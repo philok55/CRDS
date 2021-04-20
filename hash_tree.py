@@ -12,7 +12,7 @@ class HashedNode():
 
     def __str__(self, level=0):
         """Print full subtree to terminal"""
-        ret = "\t"*level+repr(f"Token: {self.rule_name} hash: {self.hash_value}")+"\n"
+        ret = "\t"*level+repr(f"{self.rule_name} => {self.hash_value}")+"\n"
         for child in self.children:
             ret += child.__str__(level+1)
         return ret

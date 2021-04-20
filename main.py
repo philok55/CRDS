@@ -2,6 +2,7 @@
 
 import sys
 from antlr4 import CommonTokenStream, FileStream
+from antlr4.tree.Trees import Trees
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
 from hash_tree_builder import HashTreeBuilder
@@ -15,7 +16,8 @@ def main(argv):
     tree = parser.file_input()
     builder = HashTreeBuilder(tree)
     builder.start()
-    builder.print_tree()
+    builder.print_tree(file_name="tree.txt")
+    # print(Trees.toStringTree(tree, None, parser))
 
 
 if __name__ == '__main__':
