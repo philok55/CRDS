@@ -1,7 +1,7 @@
 from antlr4 import CommonTokenStream
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
-from hash_tree_builder import HashTreeBuilder
+from hash_tree.hash_tree_builder import HashTreeBuilder
 
 
 class PlagiarismChecker():

@@ -12,7 +12,7 @@ ctx.getText()
 from antlr4 import ParseTreeWalker
 from parsers.python3.Python3Listener import Python3Listener
 from parsers.python3.Python3Parser import Python3Parser
-from hash_tree import HashedNode
+from .hash_tree import HashedNode
 
 
 class HashTreeBuilder(Python3Listener):
