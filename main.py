@@ -1,20 +1,22 @@
-# Creates an AST from python3.6 code using the ANTLR parser.
+"""Creates a hashed AST from python3.6 code using the ANTLR parser."""
 
 import sys
-from antlr4 import *
+from antlr4 import CommonTokenStream, FileStream
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
-from listener import ASTListener
- 
+from hash_tree_builder import HashTreeBuilder
+
+
 def main(argv):
     input_stream = FileStream(argv[1])
     lexer = Python3Lexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = Python3Parser(stream)
     tree = parser.file_input()
-    listener = ASTListener()
-    walker = ParseTreeWalker()
-    walker.walk(listener, tree)
- 
+    builder = HashTreeBuilder(tree)
+    builder.start()
+    builder.print_tree()
+
+
 if __name__ == '__main__':
     main(sys.argv)
