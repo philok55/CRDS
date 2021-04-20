@@ -8,7 +8,7 @@ def kappa(text1, text2):
                 count += 1
         except IndexError:
             break
-    return count
+    return "count"
 
 def ioc(cypher):
     cypher_stripped = [c for c in cypher.lower() if c.isalpha()]
