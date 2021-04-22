@@ -4,7 +4,7 @@ import sys
 from antlr4 import CommonTokenStream, FileStream
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
-from .hash_tree_builder import HashTreeBuilder
+from hash_tree.hash_tree_builder import HashTreeBuilder
 
 
 def print_hashed_tree(argv):

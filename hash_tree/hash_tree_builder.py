@@ -37,11 +37,13 @@ class HashTreeBuilder(Python3Listener):
         self.current.hash()
 
     def enter_rule(self, ctx):
-        self.current = self.current.add_child(ctx)
+        if ctx.getChildCount() != 1:  # Skip nodes with 1 child
+            self.current = self.current.add_child(ctx)
 
-    def exit_rule(self):
-        self.hash_node()
-        self.current = self.current.parent
+    def exit_rule(self, ctx):
+        if ctx.getChildCount() != 1:
+            self.hash_node()
+            self.current = self.current.parent
 
     def enterFile_input(self, ctx:Python3Parser.File_inputContext):
         """
@@ -58,13 +60,13 @@ class HashTreeBuilder(Python3Listener):
     # Below are all the enter- and exit methods for every ctx type we want to hash
     # --------------------------------------------------------------------
 
-    # # Enter a parse tree produced by Python3Parser#eval_input.
-    # def enterEval_input(self, ctx:Python3Parser.Eval_inputContext):
-    #     self.enter_rule(ctx)
+    # Enter a parse tree produced by Python3Parser#eval_input.
+    def enterEval_input(self, ctx:Python3Parser.Eval_inputContext):
+        self.enter_rule(ctx)
 
-    # # Exit a parse tree produced by Python3Parser#eval_input.
-    # def exitEval_input(self, ctx:Python3Parser.Eval_inputContext):
-    #     self.exit_rule()
+    # Exit a parse tree produced by Python3Parser#eval_input.
+    def exitEval_input(self, ctx:Python3Parser.Eval_inputContext):
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#decorator.
@@ -73,7 +75,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#decorator.
     def exitDecorator(self, ctx:Python3Parser.DecoratorContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#decorators.
@@ -82,7 +84,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#decorators.
     def exitDecorators(self, ctx:Python3Parser.DecoratorsContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#decorated.
@@ -91,7 +93,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#decorated.
     def exitDecorated(self, ctx:Python3Parser.DecoratedContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#async_funcdef.
@@ -100,7 +102,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#async_funcdef.
     def exitAsync_funcdef(self, ctx:Python3Parser.Async_funcdefContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#funcdef.
@@ -109,7 +111,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#funcdef.
     def exitFuncdef(self, ctx:Python3Parser.FuncdefContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#parameters.
@@ -118,7 +120,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#parameters.
     def exitParameters(self, ctx:Python3Parser.ParametersContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#typedargslist.
@@ -127,7 +129,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#typedargslist.
     def exitTypedargslist(self, ctx:Python3Parser.TypedargslistContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#tfpdef.
@@ -136,7 +138,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#tfpdef.
     def exitTfpdef(self, ctx:Python3Parser.TfpdefContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#varargslist.
@@ -145,7 +147,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#varargslist.
     def exitVarargslist(self, ctx:Python3Parser.VarargslistContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#vfpdef.
@@ -154,7 +156,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#vfpdef.
     def exitVfpdef(self, ctx:Python3Parser.VfpdefContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#stmt.
@@ -163,7 +165,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#stmt.
     def exitStmt(self, ctx:Python3Parser.StmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#simple_stmt.
@@ -172,7 +174,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#simple_stmt.
     def exitSimple_stmt(self, ctx:Python3Parser.Simple_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#small_stmt.
@@ -181,7 +183,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#small_stmt.
     def exitSmall_stmt(self, ctx:Python3Parser.Small_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#expr_stmt.
@@ -190,7 +192,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#expr_stmt.
     def exitExpr_stmt(self, ctx:Python3Parser.Expr_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#annassign.
@@ -199,7 +201,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#annassign.
     def exitAnnassign(self, ctx:Python3Parser.AnnassignContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#testlist_star_expr.
@@ -208,7 +210,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#testlist_star_expr.
     def exitTestlist_star_expr(self, ctx:Python3Parser.Testlist_star_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#augassign.
@@ -217,7 +219,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#augassign.
     def exitAugassign(self, ctx:Python3Parser.AugassignContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#del_stmt.
@@ -226,7 +228,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#del_stmt.
     def exitDel_stmt(self, ctx:Python3Parser.Del_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#pass_stmt.
@@ -235,7 +237,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#pass_stmt.
     def exitPass_stmt(self, ctx:Python3Parser.Pass_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#flow_stmt.
@@ -244,7 +246,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#flow_stmt.
     def exitFlow_stmt(self, ctx:Python3Parser.Flow_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#break_stmt.
@@ -253,7 +255,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#break_stmt.
     def exitBreak_stmt(self, ctx:Python3Parser.Break_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#continue_stmt.
@@ -262,7 +264,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#continue_stmt.
     def exitContinue_stmt(self, ctx:Python3Parser.Continue_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#return_stmt.
@@ -271,7 +273,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#return_stmt.
     def exitReturn_stmt(self, ctx:Python3Parser.Return_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#yield_stmt.
@@ -280,7 +282,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#yield_stmt.
     def exitYield_stmt(self, ctx:Python3Parser.Yield_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#raise_stmt.
@@ -289,7 +291,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#raise_stmt.
     def exitRaise_stmt(self, ctx:Python3Parser.Raise_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#import_stmt.
@@ -298,7 +300,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#import_stmt.
     def exitImport_stmt(self, ctx:Python3Parser.Import_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#import_name.
@@ -307,7 +309,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#import_name.
     def exitImport_name(self, ctx:Python3Parser.Import_nameContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#import_from.
@@ -316,7 +318,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#import_from.
     def exitImport_from(self, ctx:Python3Parser.Import_fromContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#import_as_name.
@@ -325,7 +327,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#import_as_name.
     def exitImport_as_name(self, ctx:Python3Parser.Import_as_nameContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#dotted_as_name.
@@ -334,7 +336,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#dotted_as_name.
     def exitDotted_as_name(self, ctx:Python3Parser.Dotted_as_nameContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#import_as_names.
@@ -343,7 +345,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#import_as_names.
     def exitImport_as_names(self, ctx:Python3Parser.Import_as_namesContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#dotted_as_names.
@@ -352,7 +354,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#dotted_as_names.
     def exitDotted_as_names(self, ctx:Python3Parser.Dotted_as_namesContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#dotted_name.
@@ -361,7 +363,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#dotted_name.
     def exitDotted_name(self, ctx:Python3Parser.Dotted_nameContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#global_stmt.
@@ -370,7 +372,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#global_stmt.
     def exitGlobal_stmt(self, ctx:Python3Parser.Global_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#nonlocal_stmt.
@@ -379,7 +381,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#nonlocal_stmt.
     def exitNonlocal_stmt(self, ctx:Python3Parser.Nonlocal_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#assert_stmt.
@@ -388,7 +390,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#assert_stmt.
     def exitAssert_stmt(self, ctx:Python3Parser.Assert_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#compound_stmt.
@@ -397,7 +399,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#compound_stmt.
     def exitCompound_stmt(self, ctx:Python3Parser.Compound_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#async_stmt.
@@ -406,7 +408,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#async_stmt.
     def exitAsync_stmt(self, ctx:Python3Parser.Async_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#if_stmt.
@@ -415,7 +417,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#if_stmt.
     def exitIf_stmt(self, ctx:Python3Parser.If_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#while_stmt.
@@ -424,7 +426,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#while_stmt.
     def exitWhile_stmt(self, ctx:Python3Parser.While_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#for_stmt.
@@ -433,7 +435,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#for_stmt.
     def exitFor_stmt(self, ctx:Python3Parser.For_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#try_stmt.
@@ -442,7 +444,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#try_stmt.
     def exitTry_stmt(self, ctx:Python3Parser.Try_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#with_stmt.
@@ -451,7 +453,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#with_stmt.
     def exitWith_stmt(self, ctx:Python3Parser.With_stmtContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#with_item.
@@ -460,7 +462,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#with_item.
     def exitWith_item(self, ctx:Python3Parser.With_itemContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#except_clause.
@@ -469,7 +471,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#except_clause.
     def exitExcept_clause(self, ctx:Python3Parser.Except_clauseContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#suite.
@@ -478,7 +480,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#suite.
     def exitSuite(self, ctx:Python3Parser.SuiteContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
     # XXX: this one causes a weird invalid hash value
     # # Enter a parse tree produced by Python3Parser#test.
@@ -487,7 +489,7 @@ class HashTreeBuilder(Python3Listener):
 
     # # Exit a parse tree produced by Python3Parser#test.
     # def exitTest(self, ctx:Python3Parser.TestContext):
-    #     self.exit_rule()
+    #     self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#test_nocond.
@@ -496,7 +498,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#test_nocond.
     def exitTest_nocond(self, ctx:Python3Parser.Test_nocondContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#lambdef.
@@ -505,7 +507,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#lambdef.
     def exitLambdef(self, ctx:Python3Parser.LambdefContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#lambdef_nocond.
@@ -514,7 +516,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#lambdef_nocond.
     def exitLambdef_nocond(self, ctx:Python3Parser.Lambdef_nocondContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#or_test.
@@ -523,7 +525,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#or_test.
     def exitOr_test(self, ctx:Python3Parser.Or_testContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#and_test.
@@ -532,7 +534,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#and_test.
     def exitAnd_test(self, ctx:Python3Parser.And_testContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#not_test.
@@ -541,7 +543,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#not_test.
     def exitNot_test(self, ctx:Python3Parser.Not_testContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#comparison.
@@ -550,7 +552,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#comparison.
     def exitComparison(self, ctx:Python3Parser.ComparisonContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#comp_op.
@@ -559,7 +561,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#comp_op.
     def exitComp_op(self, ctx:Python3Parser.Comp_opContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#star_expr.
@@ -568,7 +570,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#star_expr.
     def exitStar_expr(self, ctx:Python3Parser.Star_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#expr.
@@ -577,7 +579,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#expr.
     def exitExpr(self, ctx:Python3Parser.ExprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#xor_expr.
@@ -586,7 +588,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#xor_expr.
     def exitXor_expr(self, ctx:Python3Parser.Xor_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#and_expr.
@@ -595,7 +597,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#and_expr.
     def exitAnd_expr(self, ctx:Python3Parser.And_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#shift_expr.
@@ -604,7 +606,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#shift_expr.
     def exitShift_expr(self, ctx:Python3Parser.Shift_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#arith_expr.
@@ -613,7 +615,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#arith_expr.
     def exitArith_expr(self, ctx:Python3Parser.Arith_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#term.
@@ -622,7 +624,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#term.
     def exitTerm(self, ctx:Python3Parser.TermContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#factor.
@@ -631,7 +633,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#factor.
     def exitFactor(self, ctx:Python3Parser.FactorContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#power.
@@ -640,7 +642,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#power.
     def exitPower(self, ctx:Python3Parser.PowerContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#atom_expr.
@@ -649,7 +651,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#atom_expr.
     def exitAtom_expr(self, ctx:Python3Parser.Atom_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#atom.
@@ -658,7 +660,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#atom.
     def exitAtom(self, ctx:Python3Parser.AtomContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#testlist_comp.
@@ -667,7 +669,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#testlist_comp.
     def exitTestlist_comp(self, ctx:Python3Parser.Testlist_compContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#trailer.
@@ -676,7 +678,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#trailer.
     def exitTrailer(self, ctx:Python3Parser.TrailerContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#subscriptlist.
@@ -685,7 +687,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#subscriptlist.
     def exitSubscriptlist(self, ctx:Python3Parser.SubscriptlistContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#subscript.
@@ -694,7 +696,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#subscript.
     def exitSubscript(self, ctx:Python3Parser.SubscriptContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#sliceop.
@@ -703,7 +705,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#sliceop.
     def exitSliceop(self, ctx:Python3Parser.SliceopContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#exprlist.
@@ -712,7 +714,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#exprlist.
     def exitExprlist(self, ctx:Python3Parser.ExprlistContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#testlist.
@@ -721,7 +723,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#testlist.
     def exitTestlist(self, ctx:Python3Parser.TestlistContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#dictorsetmaker.
@@ -730,7 +732,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#dictorsetmaker.
     def exitDictorsetmaker(self, ctx:Python3Parser.DictorsetmakerContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#classdef.
@@ -739,7 +741,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#classdef.
     def exitClassdef(self, ctx:Python3Parser.ClassdefContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#arglist.
@@ -748,7 +750,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#arglist.
     def exitArglist(self, ctx:Python3Parser.ArglistContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#argument.
@@ -757,7 +759,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#argument.
     def exitArgument(self, ctx:Python3Parser.ArgumentContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#comp_iter.
@@ -766,7 +768,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#comp_iter.
     def exitComp_iter(self, ctx:Python3Parser.Comp_iterContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#comp_for.
@@ -775,7 +777,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#comp_for.
     def exitComp_for(self, ctx:Python3Parser.Comp_forContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#comp_if.
@@ -784,7 +786,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#comp_if.
     def exitComp_if(self, ctx:Python3Parser.Comp_ifContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#encoding_decl.
@@ -793,7 +795,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#encoding_decl.
     def exitEncoding_decl(self, ctx:Python3Parser.Encoding_declContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#yield_expr.
@@ -802,7 +804,7 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#yield_expr.
     def exitYield_expr(self, ctx:Python3Parser.Yield_exprContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
 
 
     # Enter a parse tree produced by Python3Parser#yield_arg.
@@ -811,4 +813,4 @@ class HashTreeBuilder(Python3Listener):
 
     # Exit a parse tree produced by Python3Parser#yield_arg.
     def exitYield_arg(self, ctx:Python3Parser.Yield_argContext):
-        self.exit_rule()
+        self.exit_rule(ctx)
