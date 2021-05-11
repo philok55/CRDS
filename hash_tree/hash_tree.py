@@ -1,14 +1,17 @@
 import hashlib
 from antlr4 import ParserRuleContext
-from parsers.python3.Python3Parser import Python3Parser
 
 class HashedNode():
-    def __init__(self, ctx, parent=None):
+    def __init__(self, ctx, parent=None, parser=None):
+        if parser is None:
+            parser=parent.parser
+        self.parser=parser
         self.parent = parent
         self.children = []
         self.ctx = ctx
         self.hash_value = None
-        self.rule_name = Python3Parser.ruleNames[ctx.getRuleIndex()]
+        self.rule_name = parser.ruleNames[ctx.getRuleIndex()]
+        self.sub_tree_size = 1
 
     def __str__(self, level=0):
         """Print full subtree to terminal"""
@@ -26,8 +29,16 @@ class HashedNode():
         return child
 
     def hash(self):
-        # QUESTION: is the rule name a good value to hash?
         tmp_hash = hashlib.md5(self.rule_name.encode()).hexdigest()
         for child in self.children:
             tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[-32:]
         self.hash_value = tmp_hash
+
+    def set_subtree_size(self):
+        for child in self.children:
+            self.sub_tree_size += child.sub_tree_size
+        return self.sub_tree_size
+
+    def get_file_location(self):
+        return ((self.ctx.start.line, self.ctx.start.column), 
+                (self.ctx.stop.line, self.ctx.stop.column))

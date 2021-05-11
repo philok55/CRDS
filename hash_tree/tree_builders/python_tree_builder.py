@@ -12,15 +12,17 @@ ctx.getText()
 from antlr4 import ParseTreeWalker
 from parsers.python3.Python3Listener import Python3Listener
 from parsers.python3.Python3Parser import Python3Parser
-from .hash_tree import HashedNode
+from hash_tree.hash_tree import HashedNode
 
 
-class HashTreeBuilder(Python3Listener):
+class PythonTreeBuilder(Python3Listener):
     def __init__(self, tree):
         super().__init__()
         self.tree = tree
         self.hashed_tree = None
         self.current = None
+        self.sorted_trees = {}
+        self.sub_tree_sizes = []
 
     def start(self):
         walker = ParseTreeWalker()
@@ -36,6 +38,14 @@ class HashTreeBuilder(Python3Listener):
     def hash_node(self):
         self.current.hash()
 
+    def store_subtree(self):
+        size = self.current.set_subtree_size()
+        if size in self.sorted_trees:
+            self.sorted_trees[size].append(self.current)
+        else:
+            self.sorted_trees.update({size: [self.current]})
+            self.sub_tree_sizes.append(size)
+
     def enter_rule(self, ctx):
         if ctx.getChildCount() != 1:  # Skip nodes with 1 child
             self.current = self.current.add_child(ctx)
@@ -43,6 +53,7 @@ class HashTreeBuilder(Python3Listener):
     def exit_rule(self, ctx):
         if ctx.getChildCount() != 1:
             self.hash_node()
+            self.store_subtree()
             self.current = self.current.parent
 
     def enterFile_input(self, ctx:Python3Parser.File_inputContext):
@@ -50,14 +61,14 @@ class HashTreeBuilder(Python3Listener):
         File input subtree, this is the root node.
         We add this ctx as the root of our hashed tree.
         """
-        self.hashed_tree = HashedNode(ctx)
+        self.hashed_tree = HashedNode(ctx, parser=Python3Parser)
         self.current = self.hashed_tree
 
     def exitFile_input(self, ctx:Python3Parser.File_inputContext):
         self.hash_node()
 
     # --------------------------------------------------------------------
-    # Below are all the enter- and exit methods for every ctx type we want to hash
+    # Below are all the enter- and exit methods for every ctx type
     # --------------------------------------------------------------------
 
     # Enter a parse tree produced by Python3Parser#eval_input.

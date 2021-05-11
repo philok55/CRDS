@@ -1,39 +1,64 @@
 from antlr4 import CommonTokenStream
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
-from hash_tree.hash_tree_builder import HashTreeBuilder
+from parsers.C.CLexer import CLexer
+from parsers.C.CParser import CParser
+from hash_tree.tree_builders.python_tree_builder import PythonTreeBuilder
+from hash_tree.tree_builders.c_tree_builder import CTreeBuilder
 
 
 class PlagiarismChecker():
     """Between 2 files for now."""
 
-    def __init__(self, source, target):
+    PARSERS = {
+        'py': (Python3Lexer, Python3Parser, PythonTreeBuilder), 
+        'c': (CLexer, CParser, CTreeBuilder)
+    }
+
+    def __init__(self, source, target, extension):
+        self.extension = extension
+        (self.lexer, self.parser, self.tree_builder) = self.PARSERS[extension]
         self.source = source
         self.target = target
         self.source_tree = None
         self.target_tree = None
+        self.source_sub_trees = None
+        self.target_sub_trees = None
+        self.sizes = []
+        self.similarities = []
+
+    def start_parser(self, parser):
+        if self.extension == 'py':
+            return parser.file_input()
+        if self.extension == 'c':
+            return parser.compilationUnit()
 
     def build_hash_trees(self):
-        source_lexer = Python3Lexer(self.source)
-        target_lexer = Python3Lexer(self.target)
+        source_lexer = self.lexer(self.source)
+        target_lexer = self.lexer(self.target)
 
         source_stream = CommonTokenStream(source_lexer)
         target_stream = CommonTokenStream(target_lexer)
 
-        source_parser = Python3Parser(source_stream)
-        target_parser = Python3Parser(target_stream)
+        source_parser = self.parser(source_stream)
+        target_parser = self.parser(target_stream)
 
-        source_tree = source_parser.file_input()
-        target_tree = target_parser.file_input()
+        source_tree = self.start_parser(source_parser)
+        target_tree = self.start_parser(target_parser)
 
-        source_builder = HashTreeBuilder(source_tree)
-        target_builder = HashTreeBuilder(target_tree)
+        source_builder = self.tree_builder(source_tree)
+        target_builder = self.tree_builder(target_tree)
 
         source_builder.start()
         target_builder.start()
 
         self.source_tree = source_builder.hashed_tree
         self.target_tree = target_builder.hashed_tree
+
+        self.source_sub_trees = source_builder.sorted_trees
+        self.target_sub_trees = target_builder.sorted_trees
+
+        self.sizes = sorted(source_builder.sub_tree_sizes, reverse=True)
 
     def check_completely_similar(self):
         print("----- Running Similarity Check ------")
@@ -43,3 +68,18 @@ class PlagiarismChecker():
             print("These files are 100% structurally similar.")
         else:
             print("There are structural differences between these files.")
+
+    def similarity_check(self):
+        if None in [self.source_tree, self.target_tree]:
+            self.build_hash_trees()
+        for size in self.sizes:
+            if size <= 2:
+                break
+            if size not in self.target_sub_trees:
+                continue
+            for s_subtree in self.source_sub_trees[size]:
+                for t_subtree in self.target_sub_trees[size]:
+                    if s_subtree.hash_value == t_subtree.hash_value:
+                        self.similarities.append(s_subtree.get_file_location())
+
+        print(self.similarities)
