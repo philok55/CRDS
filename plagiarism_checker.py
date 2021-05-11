@@ -32,6 +32,7 @@ class PlagiarismChecker():
             return parser.file_input()
         if self.extension == 'c':
             return parser.compilationUnit()
+        return None
 
     def build_hash_trees(self):
         source_lexer = self.lexer(self.source)
@@ -64,7 +65,9 @@ class PlagiarismChecker():
         print("----- Running Similarity Check ------")
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
-        if self.source_tree.hash_value == self.target_tree.hash_value:
+        if self.source_tree.exact_hash == self.target_tree.exact_hash:
+            print("These files are 100% structurally similar, without reorderings.")
+        elif self.source_tree.hash_value == self.target_tree.hash_value:
             print("These files are 100% structurally similar.")
         else:
             print("There are structural differences between these files.")
@@ -73,13 +76,16 @@ class PlagiarismChecker():
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
         for size in self.sizes:
-            if size <= 2:
+            if size <= 5:
                 break
             if size not in self.target_sub_trees:
                 continue
             for s_subtree in self.source_sub_trees[size]:
                 for t_subtree in self.target_sub_trees[size]:
                     if s_subtree.hash_value == t_subtree.hash_value:
-                        self.similarities.append(s_subtree.get_file_location())
+                        self.similarities.append((
+                            s_subtree.get_file_location(),
+                            t_subtree.get_file_location()
+                        ))
 
         print(self.similarities)

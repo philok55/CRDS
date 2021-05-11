@@ -10,6 +10,7 @@ class HashedNode():
         self.children = []
         self.ctx = ctx
         self.hash_value = None
+        self.exact_hash = None
         self.rule_name = parser.ruleNames[ctx.getRuleIndex()]
         self.sub_tree_size = 1
 
@@ -29,10 +30,12 @@ class HashedNode():
         return child
 
     def hash(self):
-        tmp_hash = hashlib.md5(self.rule_name.encode()).hexdigest()
+        tmp_hash = tmp_hash_exact = hashlib.md5(self.rule_name.encode()).hexdigest()
         for child in self.children:
             tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[-32:]
+            tmp_hash_exact += child.exact_hash  # string append
         self.hash_value = tmp_hash
+        self.exact_hash = hashlib.md5(tmp_hash_exact.encode()).hexdigest()
 
     def set_subtree_size(self):
         for child in self.children:

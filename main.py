@@ -17,6 +17,7 @@ def main(argv):
     source_stream = FileStream(argv[1])
     target_stream = FileStream(argv[2])
     checker = PlagiarismChecker(source_stream, target_stream, ext_1)
+    # checker.check_completely_similar()
     checker.similarity_check()
 
 
