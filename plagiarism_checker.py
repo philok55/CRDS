@@ -4,7 +4,7 @@ It reads the files and executes the comparison.
 """
 
 
-from antlr4 import CommonTokenStream
+from antlr4 import CommonTokenStream, FileStream
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
 from parsers.C.CLexer import CLexer
@@ -31,6 +31,9 @@ class PlagiarismChecker():
     # Minimum size for a sub tree to be compared
     TREE_SIZE_THRESHOLD = 4
 
+    HL_COLOR = '\033[91m'
+    STD_COLOR = '\033[0m'
+ 
     def __init__(self, source, target, extension):
         self.extension = extension
         (self.lexer, self.parser, self.tree_builder) = self.PARSERS[extension]
@@ -58,8 +61,8 @@ class PlagiarismChecker():
         Lexer and Parser are run, ASTs are built, 
         hashed and split into sorted sub trees.
         """
-        source_lexer = self.lexer(self.source)
-        target_lexer = self.lexer(self.target)
+        source_lexer = self.lexer(FileStream(self.source))
+        target_lexer = self.lexer(FileStream(self.target))
 
         source_stream = CommonTokenStream(source_lexer)
         target_stream = CommonTokenStream(target_lexer)
@@ -120,7 +123,7 @@ class PlagiarismChecker():
                             s_subtree.get_file_location(),
                             t_subtree.get_file_location()
                         ))
-        return similarities
+        self.print_ui(similarities=similarities)
 
     def similarity_check_new(self):
         """
@@ -130,10 +133,11 @@ class PlagiarismChecker():
         By only using one linearised tree, we can skip subtrees that are within
         an already matched tree.
         """
+        print("----- Running Philo's Similarity Check ------")
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
         self.preorder_search(self.source_tree)
-        return self.similarities
+        self.print_ui()
 
     def preorder_search(self, current):
         """The recursive traversal of our algorithm."""
@@ -154,3 +158,54 @@ class PlagiarismChecker():
             return  # Don't match sub trees that are too small
         for child in current.children:
             self.preorder_search(child)
+
+    def print_ui(self, similarities=None):
+        """
+        Prints a simple highlighting UI to the terminal, 
+        displaying similarities between two files.
+        """
+        if similarities is None:
+            similarities = self.similarities
+
+        print("-----------------------------------------------------------")
+        print(f"SOURCE FILE: {self.source}")
+        print("-----------------------------------------------------------")
+        print("\n")
+        with open(self.source) as s:
+            sim_active = False
+            next_sim = 0
+            for i, line in enumerate(s):
+                if not sim_active:
+                    if next_sim < len(similarities):
+                        sim = similarities[next_sim][0]
+                    sim_active = True
+                if i >= sim[0][0]-1 and i <= sim[1][0]-1:
+                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
+                    if i == sim[1][0]-1:
+                        sim_active = False
+                        next_sim += 1
+                else:
+                    print(line, end='')
+
+        print("\n\n\n")
+        print("-----------------------------------------------------------")
+        print(f"TARGET FILE: {self.target}")
+        print("-----------------------------------------------------------")
+        print("\n")
+        with open(self.target) as t:
+            sim_active = False
+            next_sim = 0
+            for i, line in enumerate(t):
+                if not sim_active:
+                    if next_sim < len(similarities):
+                        sim = similarities[next_sim][1]
+                    sim_active = True
+                if i >= sim[0][0]-1 and i <= sim[1][0]-1:
+                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
+                    if i == sim[1][0]-1:
+                        sim_active = False
+                        next_sim += 1
+                else:
+                    print(line, end='')
+        
+        print("\n\n\n")

@@ -16,12 +16,10 @@ def main(argv):
         print("File types not supported.")
         return
 
-    source_stream = FileStream(argv[1])
-    target_stream = FileStream(argv[2])
-    checker = PlagiarismChecker(source_stream, target_stream, ext_1)
+    checker = PlagiarismChecker(argv[1], argv[2], ext_1)
     # checker.check_completely_similar()
     # checker.similarity_check()
-    print(checker.similarity_check_new())
+    checker.similarity_check_new()
 
 
 if __name__ == '__main__':
