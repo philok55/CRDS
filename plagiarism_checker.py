@@ -1,3 +1,9 @@
+"""
+The main plagiarism checking class. 
+It reads the files and executes the comparison.
+"""
+
+
 from antlr4 import CommonTokenStream
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
@@ -8,13 +14,21 @@ from hash_tree.tree_builders.c_tree_builder import CTreeBuilder
 
 
 class PlagiarismChecker():
-    """Between 2 files for now."""
+    """
+    The main plagiarism checking class. 
+    It reads the files and executes the comparison.
 
+    Currently only between two files.
+    Python and C are supported.
+    """
+
+    # The supported file extensions and associated ANTLR classes
     PARSERS = {
         'py': (Python3Lexer, Python3Parser, PythonTreeBuilder), 
         'c': (CLexer, CParser, CTreeBuilder)
     }
 
+    # Minimum size for a sub tree to be compared
     TREE_SIZE_THRESHOLD = 4
 
     def __init__(self, source, target, extension):
@@ -30,6 +44,7 @@ class PlagiarismChecker():
         self.similarities = []
 
     def start_parser(self, parser):
+        """Start the parser by calling the (language specific) entry point."""
         if self.extension == 'py':
             return parser.file_input()
         if self.extension == 'c':
@@ -37,6 +52,12 @@ class PlagiarismChecker():
         return None
 
     def build_hash_trees(self):
+        """
+        Preprocessing step:
+
+        Lexer and Parser are run, ASTs are built, 
+        hashed and split into sorted sub trees.
+        """
         source_lexer = self.lexer(self.source)
         target_lexer = self.lexer(self.target)
 
@@ -65,7 +86,7 @@ class PlagiarismChecker():
 
     def check_completely_similar(self):
         """Checks full similarity of two files by only comparing the root nodes."""
-        print("----- Running Similarity Check ------")
+        print("----- Running 100% Similarity Check ------")
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
         if self.source_tree.exact_hash == self.target_tree.exact_hash:
@@ -77,11 +98,13 @@ class PlagiarismChecker():
 
     def similarity_check_ccs(self):
         """
-        The algorithm from the CCS paper.
+        The comparison algorithm from the CCS paper:
+        https://doi.org/10.1109/ICBNMT.2010.5705174.
 
         Both trees are compared in linear form, 
         cross-comparing sub trees of the same size.
         """
+        print("----- Running CCS Similarity Check ------")
         similarities = []
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
@@ -113,6 +136,7 @@ class PlagiarismChecker():
         return self.similarities
 
     def preorder_search(self, current):
+        """The recursive traversal of our algorithm."""
         size = current.sub_tree_size
         targets = self.target_sub_trees[size]
         for target in targets:
@@ -121,7 +145,11 @@ class PlagiarismChecker():
                     current.get_file_location(),
                     target.get_file_location()
                 ))
-                return  # No need to search children
+                # No need to search children for similarity check.
+                # This is the point to look for clues within these similar subtrees.
+                # Here we will check if the hash_exact values are the same,
+                # and if they are not, look further.
+                return
         if current.sub_tree_size < self.TREE_SIZE_THRESHOLD:
             return  # Don't match sub trees that are too small
         for child in current.children:

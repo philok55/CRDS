@@ -1,3 +1,5 @@
+"""Main entry point for the plagiarism checker module."""
+
 import sys
 from antlr4 import FileStream
 from plagiarism_checker import PlagiarismChecker
