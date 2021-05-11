@@ -66,6 +66,7 @@ class PythonTreeBuilder(Python3Listener):
 
     def exitFile_input(self, ctx:Python3Parser.File_inputContext):
         self.hash_node()
+        self.store_subtree()
 
     # --------------------------------------------------------------------
     # Below are all the enter- and exit methods for every ctx type

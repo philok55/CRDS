@@ -60,6 +60,7 @@ class CTreeBuilder(CListener):
     # Exit a parse tree produced by CParser#compilationUnit.
     def exitCompilationUnit(self, ctx:CParser.CompilationUnitContext):
         self.hash_node()
+        self.store_subtree()
 
     # --------------------------------------------------------------------
     # Below are all the enter- and exit methods for every ctx type

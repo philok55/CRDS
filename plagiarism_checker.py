@@ -15,6 +15,8 @@ class PlagiarismChecker():
         'c': (CLexer, CParser, CTreeBuilder)
     }
 
+    TREE_SIZE_THRESHOLD = 4
+
     def __init__(self, source, target, extension):
         self.extension = extension
         (self.lexer, self.parser, self.tree_builder) = self.PARSERS[extension]
@@ -62,6 +64,7 @@ class PlagiarismChecker():
         self.sizes = sorted(source_builder.sub_tree_sizes, reverse=True)
 
     def check_completely_similar(self):
+        """Checks full similarity of two files by only comparing the root nodes."""
         print("----- Running Similarity Check ------")
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
@@ -72,20 +75,54 @@ class PlagiarismChecker():
         else:
             print("There are structural differences between these files.")
 
-    def similarity_check(self):
+    def similarity_check_ccs(self):
+        """
+        The algorithm from the CCS paper.
+
+        Both trees are compared in linear form, 
+        cross-comparing sub trees of the same size.
+        """
+        similarities = []
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
         for size in self.sizes:
-            if size <= 5:
+            if size < self.TREE_SIZE_THRESHOLD:
                 break
             if size not in self.target_sub_trees:
                 continue
             for s_subtree in self.source_sub_trees[size]:
                 for t_subtree in self.target_sub_trees[size]:
                     if s_subtree.hash_value == t_subtree.hash_value:
-                        self.similarities.append((
+                        similarities.append((
                             s_subtree.get_file_location(),
                             t_subtree.get_file_location()
                         ))
+        return similarities
 
-        print(self.similarities)
+    def similarity_check_new(self):
+        """
+        Alternative implementation to CCS.
+        
+        We traverse the source tree, and use the same hash comparison as CCS.
+        By only using one linearised tree, we can skip subtrees that are within
+        an already matched tree.
+        """
+        if None in [self.source_tree, self.target_tree]:
+            self.build_hash_trees()
+        self.preorder_search(self.source_tree)
+        return self.similarities
+
+    def preorder_search(self, current):
+        size = current.sub_tree_size
+        targets = self.target_sub_trees[size]
+        for target in targets:
+            if current.hash_value == target.hash_value:
+                self.similarities.append((
+                    current.get_file_location(),
+                    target.get_file_location()
+                ))
+                return  # No need to search children
+        if current.sub_tree_size < self.TREE_SIZE_THRESHOLD:
+            return  # Don't match sub trees that are too small
+        for child in current.children:
+            self.preorder_search(child)
