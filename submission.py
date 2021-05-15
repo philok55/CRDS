@@ -14,6 +14,10 @@ class Submission():
         'c': (CLexer, CParser, CTreeBuilder)
     }
 
+    NO_ERROR = 0
+    LEXER_ERROR = 1
+    PARSER_ERROR = 2
+
     def __init__(self, file, extension):
         self.file = file
         self.extension = extension
@@ -21,6 +25,7 @@ class Submission():
         self.tree = None
         self.sub_trees = None
         self.sizes = []
+        self.error = self.NO_ERROR
 
     def start_parser(self, parser):
         """Start the parser by calling the (language specific) entry point."""
@@ -37,12 +42,15 @@ class Submission():
         Lexer and Parser are run, ASTs are built,
         hashed and split into sorted sub trees.
         """
-        lexer = self.lexer(FileStream(self.file))
-        stream = CommonTokenStream(lexer)
-        parser = self.parser(stream)
-        tree = self.start_parser(parser)
-        builder = self.tree_builder(tree)
-        builder.start()
-        self.tree = builder.hashed_tree
-        self.sub_trees = builder.sorted_trees
-        self.sizes = sorted(builder.sub_tree_sizes, reverse=True)
+        try:
+            lexer = self.lexer(FileStream(self.file))
+            stream = CommonTokenStream(lexer)
+            parser = self.parser(stream)
+            tree = self.start_parser(parser)
+            builder = self.tree_builder(tree)
+            builder.start()
+            self.tree = builder.hashed_tree
+            self.sub_trees = builder.sorted_trees
+            self.sizes = sorted(builder.sub_tree_sizes, reverse=True)
+        except UnicodeDecodeError:
+            self.error = self.LEXER_ERROR

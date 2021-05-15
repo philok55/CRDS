@@ -1,3 +1,5 @@
+from submission import Submission
+
 class Comparison():
     # Minimum size for a sub tree to be compared
     TREE_SIZE_THRESHOLD = 2
@@ -5,13 +7,20 @@ class Comparison():
     HL_COLOR = '\033[91m'
     STD_COLOR = '\033[0m'
 
+    ERRORS = {
+        0: 'No error in this file.',
+        1: 'Error during lexing stage.',
+        2: 'Error during parsing stage.'
+    }
+
     def __init__(self, source, target):
         self.source = source
         self.target = target
         self.similarities = []
-        self.similarity_score = None
+        self.similarity_score = -1
         self.s_sim_score = None
         self.t_sim_score = None
+        self.error = False
 
     def similarity_check_ccs(self):
         """
@@ -25,6 +34,10 @@ class Comparison():
             self.source.build_hash_trees()
         if self.target.tree is None:
             self.target.build_hash_trees()
+        if (self.source.error != Submission.NO_ERROR or
+            self.target.error != Submission.NO_ERROR):
+            self.error = True
+            return False
         for size in self.source.sizes:
             if size < self.TREE_SIZE_THRESHOLD:
                 break
@@ -37,8 +50,12 @@ class Comparison():
                             s_subtree.get_file_location(),
                             t_subtree.get_file_location()
                         ))
+        return True
 
     def set_similarity_score(self):
+        if self.error:
+            return
+
         source_sim_lines = []
         target_sim_lines = []
         for sim in self.similarities:
@@ -111,7 +128,15 @@ class Comparison():
         """Prints the similarity score between the two analysed files."""
         s_file_name = self.source.file.replace('\\', '/').split('/')[-1]
         t_file_name = self.target.file.replace('\\', '/').split('/')[-1]
+
         print("")
+        if self.error:
+            print(f"COMPARISON: {s_file_name} <--> {t_file_name}: ERROR")
+            print(f"{s_file_name}: {self.ERRORS[self.source.error]}")
+            print(f"{t_file_name}: {self.ERRORS[self.target.error]}")
+            print("")
+            return
+
         print(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}")
         print(f"{s_file_name}: {self.s_sim_score}%")
         print(f"{t_file_name}: {self.t_sim_score}%")

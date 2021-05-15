@@ -38,10 +38,7 @@ class PlagiarismChecker():
                 print('RAM usage over 500MB, quitting.')
                 exit()
             submission = Submission(file, self.extension)
-            try:
-                submission.build_hash_trees()
-            except ValueError:
-                pass
+            submission.build_hash_trees()
             self.submissions.append(submission)
 
     def run_comparison(self):
