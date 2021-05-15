@@ -18,7 +18,7 @@ def main(argv):
 
     checker = PlagiarismChecker(argv[1], argv[2], ext_1)
     # checker.check_completely_similar()
-    # checker.similarity_check()
+    # checker.similarity_check_ccs()
     checker.similarity_check_new()
 
 

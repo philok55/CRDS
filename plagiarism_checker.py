@@ -142,18 +142,19 @@ class PlagiarismChecker():
     def preorder_search(self, current):
         """The recursive traversal of our algorithm."""
         size = current.sub_tree_size
-        targets = self.target_sub_trees[size]
-        for target in targets:
-            if current.hash_value == target.hash_value:
-                self.similarities.append((
-                    current.get_file_location(),
-                    target.get_file_location()
-                ))
-                # No need to search children for similarity check.
-                # This is the point to look for clues within these similar subtrees.
-                # Here we will check if the hash_exact values are the same,
-                # and if they are not, look further.
-                return
+        if size in self.target_sub_trees:
+            targets = self.target_sub_trees[size]
+            for target in targets:
+                if current.hash_value == target.hash_value:
+                    self.similarities.append((
+                        current.get_file_location(),
+                        target.get_file_location()
+                    ))
+                    # No need to search children for similarity check.
+                    # This is the point to look for clues within these similar subtrees.
+                    # Here we will check if the hash_exact values are the same,
+                    # and if they are not, look further.
+                    return
         if current.sub_tree_size < self.TREE_SIZE_THRESHOLD:
             return  # Don't match sub trees that are too small
         for child in current.children:
