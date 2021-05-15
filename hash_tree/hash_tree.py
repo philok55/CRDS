@@ -42,10 +42,10 @@ class HashedNode():
         """
         Hash the current node.
 
-        hash_value is an MD5 hash of the CTX type, summed with the hash 
+        hash_value is an MD5 hash of the CTX type, summed with the hash
         value of all children (invariant over reorderings).
 
-        hash_exact is an MD5 hash of the CTX type, appended to the hash 
+        hash_exact is an MD5 hash of the CTX type, appended to the hash
         values of all children and then hashed again (variant over reorderings).
 
         This function expects the child nodes to already have a hash value
@@ -53,7 +53,10 @@ class HashedNode():
         """
         tmp_hash = tmp_hash_exact = hashlib.md5(self.rule_name.encode()).hexdigest()
         for child in self.children:
-            tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[-32:]
+            try:
+                tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[-32:]
+            except ValueError:
+                pass
             tmp_hash_exact += child.exact_hash  # string append
         self.hash_value = tmp_hash
         self.exact_hash = hashlib.md5(tmp_hash_exact.encode()).hexdigest()
@@ -61,7 +64,7 @@ class HashedNode():
     def set_subtree_size(self):
         """
         Set size of sub tree (sum of sizes of children + 1).
-        
+
         This function expects the child nodes to already have a size
         (call in upwards pass of tree traversal).
         """
@@ -72,5 +75,5 @@ class HashedNode():
 
     def get_file_location(self):
         """Returns the file location of the subtree below this node."""
-        return ((self.ctx.start.line, self.ctx.start.column), 
+        return ((self.ctx.start.line, self.ctx.start.column),
                 (self.ctx.stop.line, self.ctx.stop.column))
