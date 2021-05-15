@@ -1,5 +1,5 @@
 """
-The main plagiarism checking class. 
+The main plagiarism checking class.
 It reads the files and executes the comparison.
 """
 
@@ -15,7 +15,7 @@ from hash_tree.tree_builders.c_tree_builder import CTreeBuilder
 
 class PlagiarismChecker():
     """
-    The main plagiarism checking class. 
+    The main plagiarism checking class.
     It reads the files and executes the comparison.
 
     Currently only between two files.
@@ -24,27 +24,39 @@ class PlagiarismChecker():
 
     # The supported file extensions and associated ANTLR classes
     PARSERS = {
-        'py': (Python3Lexer, Python3Parser, PythonTreeBuilder), 
+        'py': (Python3Lexer, Python3Parser, PythonTreeBuilder),
         'c': (CLexer, CParser, CTreeBuilder)
     }
 
     # Minimum size for a sub tree to be compared
-    TREE_SIZE_THRESHOLD = 4
+    TREE_SIZE_THRESHOLD = 2
 
     HL_COLOR = '\033[91m'
     STD_COLOR = '\033[0m'
- 
-    def __init__(self, source, target, extension):
+
+    def __init__(self, files, extension):
         self.extension = extension
         (self.lexer, self.parser, self.tree_builder) = self.PARSERS[extension]
-        self.source = source
-        self.target = target
+        self.files = files
+        self.source = files[0]
+        self.target = files[1]
         self.source_tree = None
         self.target_tree = None
         self.source_sub_trees = None
         self.target_sub_trees = None
         self.sizes = []
         self.similarities = []
+
+    def run(self):
+        """Main entry for similarity check."""
+        for source in self.files:
+            self.source = source
+            for target in self.files:
+                if target == source:
+                    continue
+                self.target = target
+                self.similarity_check_ccs()
+                self.print_similarity_score()
 
     def start_parser(self, parser):
         """Start the parser by calling the (language specific) entry point."""
@@ -58,7 +70,7 @@ class PlagiarismChecker():
         """
         Preprocessing step:
 
-        Lexer and Parser are run, ASTs are built, 
+        Lexer and Parser are run, ASTs are built,
         hashed and split into sorted sub trees.
         """
         source_lexer = self.lexer(FileStream(self.source))
@@ -87,28 +99,16 @@ class PlagiarismChecker():
 
         self.sizes = sorted(source_builder.sub_tree_sizes, reverse=True)
 
-    def check_completely_similar(self):
-        """Checks full similarity of two files by only comparing the root nodes."""
-        print("----- Running 100% Similarity Check ------")
-        if None in [self.source_tree, self.target_tree]:
-            self.build_hash_trees()
-        if self.source_tree.exact_hash == self.target_tree.exact_hash:
-            print("These files are 100% structurally similar, without reorderings.")
-        elif self.source_tree.hash_value == self.target_tree.hash_value:
-            print("These files are 100% structurally similar.")
-        else:
-            print("There are structural differences between these files.")
-
     def similarity_check_ccs(self):
         """
         The comparison algorithm from the CCS paper:
         https://doi.org/10.1109/ICBNMT.2010.5705174.
 
-        Both trees are compared in linear form, 
+        Both trees are compared in linear form,
         cross-comparing sub trees of the same size.
         """
         print("----- Running CCS Similarity Check ------")
-        similarities = []
+        self.similarities = []
         if None in [self.source_tree, self.target_tree]:
             self.build_hash_trees()
         for size in self.sizes:
@@ -119,72 +119,58 @@ class PlagiarismChecker():
             for s_subtree in self.source_sub_trees[size]:
                 for t_subtree in self.target_sub_trees[size]:
                     if s_subtree.hash_value == t_subtree.hash_value:
-                        similarities.append((
+                        self.similarities.append((
                             s_subtree.get_file_location(),
                             t_subtree.get_file_location()
                         ))
-        self.print_ui(similarities=similarities)
 
-    def similarity_check_new(self):
-        """
-        Alternative implementation to CCS.
-        
-        We traverse the source tree, and use the same hash comparison as CCS.
-        By only using one linearised tree, we can skip subtrees that are within
-        an already matched tree.
-        """
-        print("----- Running Philo's Similarity Check ------")
-        if None in [self.source_tree, self.target_tree]:
-            self.build_hash_trees()
-        self.preorder_search(self.source_tree)
-        self.print_ui()
+    def get_similarity_score(self):
+        source_sim_lines = []
+        target_sim_lines = []
+        for sim in self.similarities:
+            source_sim_lines += range(sim[0][0][0], sim[0][1][0] + 1)
+            target_sim_lines += range(sim[1][0][0], sim[1][1][0] + 1)
+        target_sim_lines = set(target_sim_lines)
+        source_sim_lines = set(source_sim_lines)
 
-    def preorder_search(self, current):
-        """The recursive traversal of our algorithm."""
-        size = current.sub_tree_size
-        if size in self.target_sub_trees:
-            targets = self.target_sub_trees[size]
-            for target in targets:
-                if current.hash_value == target.hash_value:
-                    self.similarities.append((
-                        current.get_file_location(),
-                        target.get_file_location()
-                    ))
-                    # No need to search children for similarity check.
-                    # This is the point to look for clues within these similar subtrees.
-                    # Here we will check if the hash_exact values are the same,
-                    # and if they are not, look further.
-                    return
-        if current.sub_tree_size < self.TREE_SIZE_THRESHOLD:
-            return  # Don't match sub trees that are too small
-        for child in current.children:
-            self.preorder_search(child)
+        source_len = 0
+        with open(self.source) as s:
+            source_len = sum(1 for _ in s)
+
+        target_len = 0
+        with open(self.target) as t:
+            target_len = sum(1 for _ in t)
+
+        s_sim_score = round(len(source_sim_lines) / source_len * 100, 2)
+        t_sim_score = round(len(target_sim_lines) / target_len * 100, 2)
+        return s_sim_score, t_sim_score
 
     def print_ui(self, similarities=None):
         """
-        Prints a simple highlighting UI to the terminal, 
+        Prints a simple highlighting UI to the terminal,
         displaying similarities between two files.
         """
         if similarities is None:
             similarities = self.similarities
+
+        source_sim_lines = []
+        target_sim_lines = []
+        for sim in similarities:
+            source_sim_lines += range(sim[0][0][0], sim[0][1][0] + 1)
+            target_sim_lines += range(sim[1][0][0], sim[1][1][0] + 1)
+        target_sim_lines = set(target_sim_lines)
+        source_sim_lines = set(source_sim_lines)
 
         print("-----------------------------------------------------------")
         print(f"SOURCE FILE: {self.source}")
         print("-----------------------------------------------------------")
         print("\n")
         with open(self.source) as s:
-            sim_active = False
-            next_sim = 0
+            s_line_count = 0
             for i, line in enumerate(s):
-                if not sim_active:
-                    if next_sim < len(similarities):
-                        sim = similarities[next_sim][0]
-                    sim_active = True
-                if i >= sim[0][0]-1 and i <= sim[1][0]-1:
+                s_line_count += 1
+                if i+1 in source_sim_lines:
                     print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
-                    if i == sim[1][0]-1:
-                        sim_active = False
-                        next_sim += 1
                 else:
                     print(line, end='')
 
@@ -194,19 +180,30 @@ class PlagiarismChecker():
         print("-----------------------------------------------------------")
         print("\n")
         with open(self.target) as t:
-            sim_active = False
-            next_sim = 0
+            t_line_count = 0
             for i, line in enumerate(t):
-                if not sim_active:
-                    if next_sim < len(similarities):
-                        sim = similarities[next_sim][1]
-                    sim_active = True
-                if i >= sim[0][0]-1 and i <= sim[1][0]-1:
+                t_line_count += 1
+                if i+1 in target_sim_lines:
                     print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
-                    if i == sim[1][0]-1:
-                        sim_active = False
-                        next_sim += 1
                 else:
                     print(line, end='')
-        
+
         print("\n\n\n")
+
+        s_sim_score = round(len(source_sim_lines) / s_line_count * 100, 2)
+        t_sim_score = round(len(target_sim_lines) / t_line_count * 100, 2)
+        print(f"SIMILARITY IN SOURCE FILE: {s_sim_score}%")
+        print(f"SIMILARITY IN TARGET FILE: {t_sim_score}%")
+        print("\n")
+
+    def print_similarity_score(self):
+        """Prints the similarity score between the two analysed files."""
+        s_sim_score, t_sim_score = self.get_similarity_score()
+
+        s_file_name = self.source.replace('\\', '/').split('/')[-1]
+        t_file_name = self.target.replace('\\', '/').split('/')[-1]
+        print("")
+        print(f"COMPARISON: {s_file_name} <--> {t_file_name}")
+        print(f"{s_file_name}: {s_sim_score}%")
+        print(f"{t_file_name}: {t_sim_score}%")
+        print("")

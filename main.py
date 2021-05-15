@@ -1,5 +1,6 @@
 """Main entry point for the plagiarism checker module."""
 
+import os
 import sys
 from antlr4 import FileStream
 from plagiarism_checker import PlagiarismChecker
@@ -9,17 +10,46 @@ SUPPORTED_EXTENSIONS = ['py', 'c']
 
 
 def main(argv):
-    ext_1 = argv[1].split('.')[-1]
-    ext_2 = argv[2].split('.')[-1]
+    files = []
+    selected_ext = ''
+    try:
+        dir = os.listdir(argv[1])
+        for file in dir:
+            path = os.path.join(argv[1], file)
+            if os.path.isfile(path):
+                ext = file.split('.')[-1]
+                if ext in SUPPORTED_EXTENSIONS and selected_ext in ['', ext]:
+                    files.append(path)
+                    selected_ext = ext
+                elif ext in SUPPORTED_EXTENSIONS:
+                    print("There are multiple file types in this directory. Please use only one programming language at once.")
+                    return
+                else:
+                    print(f"File {file} skipped: file type not supported.")
+            else:
+                print("Warning: subdirectories are not supported. Only files in the given directory are analysed.")
+    except NotADirectoryError:
+        if len(argv) < 3:
+            print("Please select more than one file.")
+            return
+        for file in argv[1:]:
+            ext = file.split('.')[-1]
+            if ext in SUPPORTED_EXTENSIONS and selected_ext in ['', ext]:
+                files.append(file)
+                selected_ext = ext
+            elif ext in SUPPORTED_EXTENSIONS:
+                print("You have selected multiple file types. Please use only one programming language at once.")
+                return
+            else:
+                print(f"File {file} skipped: file type not supported.")
 
-    if ext_1 != ext_2 or ext_1 not in SUPPORTED_EXTENSIONS:
-        print("File types not supported.")
-        return
-
-    checker = PlagiarismChecker(argv[1], argv[2], ext_1)
-    # checker.check_completely_similar()
+    checker = PlagiarismChecker(files, selected_ext)
+    checker.run()
     # checker.similarity_check_ccs()
-    checker.similarity_check_new()
+    # checker.similarity_check_new()
+
+    # checker.print_ui()
+    # checker.print_similarity_score()
 
 
 if __name__ == '__main__':
