@@ -26,6 +26,7 @@ class Submission():
         self.sub_trees = None
         self.sizes = []
         self.error = self.NO_ERROR
+        self.build_hash_trees()
 
     def start_parser(self, parser):
         """Start the parser by calling the (language specific) entry point."""

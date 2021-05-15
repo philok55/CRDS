@@ -23,37 +23,34 @@ class PlagiarismChecker():
         self.extension = extension
         self.files = files
         self.submissions = []
-        self.comparisons = []
+        self.results = []
 
     def run(self):
         """Main entry for similarity check."""
-        self.build_submissions()
         self.run_comparison()
-        self.print_comparisons()
-
-    def build_submissions(self):
-        for file in self.files:
-            ramusage = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
-            if ramusage > 500:
-                print('RAM usage over 500MB, quitting.')
-                exit()
-            submission = Submission(file, self.extension)
-            submission.build_hash_trees()
-            self.submissions.append(submission)
+        self.print_results()
 
     def run_comparison(self):
         done = []
-        for source in self.submissions:
+        for source in self.files:
             done.append(source)
-            for target in self.submissions:
+            s_submission = Submission(source, self.extension)
+            for target in self.files:
                 if target in done:
                     continue
-                comp = Comparison(source, target)
+                t_submission = Submission(target, self.extension)
+                comp = Comparison(s_submission, t_submission)
                 comp.similarity_check_ccs()
-                comp.set_similarity_score()
-                self.comparisons.append(comp)
+                result = comp.get_results()
+                self.results.append(result)
+                del t_submission
+                del comp
+                ramusage = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+                if ramusage > 500:
+                    print('RAM usage over 500MB, quitting.')
+                    exit()
 
-    def print_comparisons(self):
-        self.comparisons.sort(key=lambda x: x.similarity_score, reverse=True)
-        for comp in self.comparisons:
-            comp.print_similarity_score()
+    def print_results(self):
+        self.results.sort(key=lambda x: x.similarity_score, reverse=True)
+        for result in self.results:
+            result.print_similarity_score()
