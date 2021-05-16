@@ -3,7 +3,7 @@ from result import Result
 
 class Comparison():
     # Minimum size for a sub tree to be compared
-    TREE_SIZE_THRESHOLD = 2
+    TREE_SIZE_THRESHOLD = 5
 
     def __init__(self, source, target):
         self.source = source

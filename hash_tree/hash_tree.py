@@ -56,7 +56,7 @@ class HashedNode():
             try:
                 tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[-32:]
             except ValueError:
-                pass
+                print("VALUE ERROR")
             tmp_hash_exact += child.exact_hash  # string append
         self.hash_value = tmp_hash
         self.exact_hash = hashlib.md5(tmp_hash_exact.encode()).hexdigest()

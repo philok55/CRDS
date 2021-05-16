@@ -55,7 +55,7 @@ class Result():
 
         print("\n\n\n")
         print("-----------------------------------------------------------")
-        print(f"TARGET FILE: {self.target.file}")
+        print(f"TARGET FILE: {self.target_file}")
         print("-----------------------------------------------------------")
         print("\n")
         with open(self.target_file) as t:
