@@ -54,7 +54,9 @@ class HashedNode():
         """
         tmp_hash = tmp_hash_exact = hashlib.md5(self.rule_name.encode()).hexdigest()
         for child in self.children:
-            tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))
+            # Remove Python-appended '0x' at the beginning and clip to 32 characters
+            tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[2:][-32:]
+            tmp_hash = tmp_hash.rjust(32, '0')  # Fill with leading zeros to match md5 length
             tmp_hash_exact += child.exact_hash  # string append
         self.hash_value = tmp_hash
         self.exact_hash = hashlib.md5(tmp_hash_exact.encode()).hexdigest()
