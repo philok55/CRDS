@@ -54,10 +54,7 @@ class HashedNode():
         """
         tmp_hash = tmp_hash_exact = hashlib.md5(self.rule_name.encode()).hexdigest()
         for child in self.children:
-            try:
-                tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[-32:]
-            except ValueError:
-                pass
+            tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))
             tmp_hash_exact += child.exact_hash  # string append
         self.hash_value = tmp_hash
         self.exact_hash = hashlib.md5(tmp_hash_exact.encode()).hexdigest()
