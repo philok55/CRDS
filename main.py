@@ -45,11 +45,6 @@ def main(argv):
 
     checker = PlagiarismChecker(files, selected_ext)
     checker.run()
-    # checker.similarity_check_ccs()
-    # checker.similarity_check_new()
-
-    # checker.print_ui()
-    # checker.print_similarity_score()
 
 
 if __name__ == '__main__':

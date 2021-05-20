@@ -34,8 +34,10 @@ class PlagiarismChecker():
     def build_submissions(self):
         for file in self.files:
             ramusage = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
-            if ramusage > 800:
+            if ramusage > 200:
                 print(f'RAM usage: {ramusage} MB')
+                print(f"Submissions parsed: {len(self.submissions)}")
+                return
             submission = Submission(file, self.extension)
             submission.build_hash_trees()
             self.submissions.append(submission)
@@ -70,8 +72,27 @@ class PlagiarismChecker():
 
     def show_results(self):
         self.results.sort(key=lambda x: x.similarity_score, reverse=True)
-        for result in self.results:
-            result.print_similarity_score()
-            answer = input("Do you want to see the UI? (y/n)")
-            if answer == 'y':
-                result.print_ui()
+        i = 0
+        while True:
+            self.results[i].print_similarity_score()
+            step = input(
+                "Select an action (press letter and then enter): \n\n\
+                 u = See User Interface (inverse diff) \n\
+                 n = Go to next submission \n\
+                 p = Go to previous submission \n\
+                 q = Quit\n")
+            if step == 'u':
+                self.results[i].print_ui()
+            elif step in ['n', '']:
+                if i == len(self.results - 1):
+                    return
+                i += 1
+            elif step == 'p':
+                if i == 0:
+                    print("\nThis is the first submission.")
+                else:
+                    i -= 1
+            elif step == 'q':
+                return
+            else:
+                print("\nInvalid input.")
