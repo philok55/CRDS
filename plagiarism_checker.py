@@ -84,7 +84,7 @@ class PlagiarismChecker():
             if step == 'u':
                 self.results[i].print_ui()
             elif step in ['n', '']:
-                if i == len(self.results - 1):
+                if i == len(self.results) - 1:
                     return
                 i += 1
             elif step == 'p':
