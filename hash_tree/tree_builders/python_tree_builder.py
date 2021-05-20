@@ -3,6 +3,7 @@ Hashed Tree builder for the Python parser.
 """
 
 from antlr4 import ParseTreeWalker
+from antlr4.tree.Tree import TerminalNode
 from parsers.python3.Python3Listener import Python3Listener
 from parsers.python3.Python3Parser import Python3Parser
 from hash_tree.hash_tree import HashedNode
@@ -65,8 +66,11 @@ class PythonTreeBuilder(Python3Listener):
         Function executed on entry of every CTX node (downward pass of traversal).
         Here we build the tree that will be hashed.
         """
-        if ctx.getChildCount() != 1:  # Skip wrapper nodes with 1 child
-            self.current = self.current.add_child(ctx)
+        # Skip 'wrapper' nodes
+        if ctx.getChildCount() == 1 and not isinstance(ctx.getChild(0), TerminalNode):
+            return
+    
+        self.current = self.current.add_child(ctx)
 
     def exit_rule(self, ctx):
         """
@@ -74,10 +78,13 @@ class PythonTreeBuilder(Python3Listener):
         Here we have the data of the children, so we can hash the current node
         and store it by sub tree size.
         """
-        if ctx.getChildCount() != 1:  # Skip wrapper nodes with 1 child
-            self.hash_node()
-            self.store_subtree()
-            self.current = self.current.parent
+        # Skip 'wrapper' nodes
+        if ctx.getChildCount() == 1 and not isinstance(ctx.getChild(0), TerminalNode):
+            return
+
+        self.hash_node()
+        self.store_subtree()
+        self.current = self.current.parent
 
     def enterFile_input(self, ctx:Python3Parser.File_inputContext):
         """
