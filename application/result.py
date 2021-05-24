@@ -86,7 +86,7 @@ class Result():
         """
         source_sim_lines = []
         target_sim_lines = []
-        reorder = self.reorderings[1]
+        reorder = self.reorderings[0]
         for sim in reorder:
             print(sim)
             print(sim[0][1][0])

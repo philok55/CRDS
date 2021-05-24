@@ -98,17 +98,38 @@ class Comparison():
         matched = []
         s_children = source.get_children()
         t_children = target.get_children()
-        for s_child in s_children:
-            for i, t_child in enumerate(t_children):
-                if i in matched:
+        for i, s_child in enumerate(s_children):
+            for j, t_child in enumerate(t_children):
+                if j in matched:
                     continue
                 if s_child.hash_value == t_child.hash_value:
-                    # add reordering
-                    reordering.append((
-                        s_child.get_file_location(),
-                        t_child.get_file_location()
-                    ))
+                    if i != j:
+                        # add reordering
+                        reordering.append((
+                            s_child.get_file_location(),
+                            t_child.get_file_location()
+                        ))
                     # save index
-                    matched.append(i)
+                    matched.append(j)
                     break
         self.reorderings.append(reordering)
+
+    def levenshteinDistance(self, s1, s2):
+        """
+        Levenshtein Distance between two lists.
+        Nice Dynamic Programming solution from source:
+        https://stackoverflow.com/a/32558749
+        """
+        if len(s1) > len(s2):
+            s1, s2 = s2, s1
+
+        distances = range(len(s1) + 1)
+        for i2, c2 in enumerate(s2):
+            distances_ = [i2+1]
+            for i1, c1 in enumerate(s1):
+                if c1 == c2:
+                    distances_.append(distances[i1])
+                else:
+                    distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+            distances = distances_
+        return distances[-1]
