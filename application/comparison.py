@@ -1,5 +1,5 @@
-from submission import Submission
-from result import Result
+from .submission import Submission
+from .result import Result
 
 class Comparison():
     # Minimum size for a sub tree to be compared
@@ -13,8 +13,9 @@ class Comparison():
         self.s_sim_score = None
         self.t_sim_score = None
         self.error = False
+        self.reorderings = []
 
-    def similarity_check_ccs(self):
+    def similarity_check_ccs(self, find_reordering=False):
         """
         The comparison algorithm from the CCS paper:
         https://doi.org/10.1109/ICBNMT.2010.5705174.
@@ -42,16 +43,11 @@ class Comparison():
                             s_subtree.get_file_location(),
                             t_subtree.get_file_location()
                         ))
-                        # if s_subtree.exact_hash != t_subtree.exact_hash:
-                        #     s_children = [c.exact_hash for c in s_subtree.get_children()]
-                        #     t_children = [c.exact_hash for c in t_subtree.get_children()]
-                        #     if s_children != t_children and set(s_children) == set(t_children):
-                        #         print(f"SOURCE: CTX: {s_subtree.rule_name} FILE: {self.source.file} LOC: {s_subtree.get_file_location()}")
-                        #         print(s_subtree)
-                        #         print(f"TARGET: CTX: {t_subtree.rule_name} FILE: {self.target.file} LOC: {t_subtree.get_file_location()}")
-                        #         print(t_subtree)
-                        #         print("")
-                        #         input()
+                        if find_reordering and s_subtree.exact_hash != t_subtree.exact_hash:
+                            s_children = [c.hash_value for c in s_subtree.get_children()]
+                            t_children = [c.hash_value for c in t_subtree.get_children()]
+                            if s_children != t_children and set(s_children) == set(t_children):
+                                self.find_reordering(s_subtree, t_subtree)
         return True
 
     def get_results(self):
@@ -93,5 +89,26 @@ class Comparison():
             self.s_sim_score,
             self.t_sim_score,
             self.source.error,
-            self.target.error
+            self.target.error,
+            self.reorderings
         )
+
+    def find_reordering(self, source, target):
+        reordering = []
+        matched = []
+        s_children = source.get_children()
+        t_children = target.get_children()
+        for s_child in s_children:
+            for i, t_child in enumerate(t_children):
+                if i in matched:
+                    continue
+                if s_child.hash_value == t_child.hash_value:
+                    # add reordering
+                    reordering.append((
+                        s_child.get_file_location(),
+                        t_child.get_file_location()
+                    ))
+                    # save index
+                    matched.append(i)
+                    break
+        self.reorderings.append(reordering)

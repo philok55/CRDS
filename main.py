@@ -3,7 +3,7 @@
 import os
 import sys
 from antlr4 import FileStream
-from plagiarism_checker import PlagiarismChecker
+from application.plagiarism_checker import PlagiarismChecker
 
 
 SUPPORTED_EXTENSIONS = ['py', 'c']

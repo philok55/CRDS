@@ -18,7 +18,8 @@ class Result():
                  s_sim_score,
                  t_sim_score,
                  s_error,
-                 t_error):
+                 t_error,
+                 reorderings):
         self.source_file = source_file
         self.target_file = target_file
         self.similarities = similarities
@@ -27,6 +28,7 @@ class Result():
         self.t_sim_score = t_sim_score
         self.s_error = s_error
         self.t_error = t_error
+        self.reorderings = reorderings
 
 
     def print_ui(self):
@@ -76,6 +78,47 @@ class Result():
         print(f"SIMILARITY IN SOURCE FILE: {s_sim_score}%")
         print(f"SIMILARITY IN TARGET FILE: {t_sim_score}%")
         print("\n")
+
+    def print_reorderings(self):
+        """
+        Prints a simple highlighting UI to the terminal,
+        displaying reorderings between two files.
+        """
+        source_sim_lines = []
+        target_sim_lines = []
+        reorder = self.reorderings[1]
+        for sim in reorder:
+            print(sim)
+            print(sim[0][1][0])
+            source_sim_lines += range(sim[0][0][0], sim[0][1][0] + 1)
+            target_sim_lines += range(sim[1][0][0], sim[1][1][0] + 1)
+        target_sim_lines = set(target_sim_lines)
+        source_sim_lines = set(source_sim_lines)
+
+        print("-----------------------------------------------------------")
+        print(f"SOURCE FILE: {self.source_file}")
+        print("-----------------------------------------------------------")
+        print("\n")
+        with open(self.source_file) as s:
+            for i, line in enumerate(s):
+                if i+1 in source_sim_lines:
+                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
+                else:
+                    print(line, end='')
+
+        print("\n\n\n")
+        print("-----------------------------------------------------------")
+        print(f"TARGET FILE: {self.target_file}")
+        print("-----------------------------------------------------------")
+        print("\n")
+        with open(self.target_file) as t:
+            for i, line in enumerate(t):
+                if i+1 in target_sim_lines:
+                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
+                else:
+                    print(line, end='')
+
+        print("\n\n\n")
 
     def print_similarity_score(self):
         """Prints the similarity score between the two analysed files."""
