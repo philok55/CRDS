@@ -29,6 +29,7 @@ class PlagiarismChecker():
         """Main entry for similarity check."""
         self.build_submissions()
         self.run_comparison()
+        self.print_to_file()
         self.show_results()
 
     def build_submissions(self):
@@ -96,3 +97,10 @@ class PlagiarismChecker():
                 return
             else:
                 print("\nInvalid input.")
+
+    def print_to_file(self):
+        self.results.sort(key=lambda x: x.similarity_score, reverse=True)
+        open("results.txt", 'w').close()
+
+        for result in self.results:
+            result.print_to_file()

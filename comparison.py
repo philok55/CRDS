@@ -42,6 +42,16 @@ class Comparison():
                             s_subtree.get_file_location(),
                             t_subtree.get_file_location()
                         ))
+                        # if s_subtree.exact_hash != t_subtree.exact_hash:
+                        #     s_children = [c.exact_hash for c in s_subtree.get_children()]
+                        #     t_children = [c.exact_hash for c in t_subtree.get_children()]
+                        #     if s_children != t_children and set(s_children) == set(t_children):
+                        #         print(f"SOURCE: CTX: {s_subtree.rule_name} FILE: {self.source.file} LOC: {s_subtree.get_file_location()}")
+                        #         print(s_subtree)
+                        #         print(f"TARGET: CTX: {t_subtree.rule_name} FILE: {self.target.file} LOC: {t_subtree.get_file_location()}")
+                        #         print(t_subtree)
+                        #         print("")
+                        #         input()
         return True
 
     def get_results(self):

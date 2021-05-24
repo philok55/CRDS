@@ -77,3 +77,6 @@ class HashedNode():
         """Returns the file location of the subtree below this node."""
         return ((self.ctx.start.line, self.ctx.start.column),
                 (self.ctx.stop.line, self.ctx.stop.column))
+
+    def get_children(self):
+        return self.children

@@ -1,3 +1,5 @@
+import filecmp
+
 class Result():
     HL_COLOR = '\033[91m'
     STD_COLOR = '\033[0m'
@@ -92,3 +94,31 @@ class Result():
         print(f"{s_file_name}: {self.s_sim_score}%")
         print(f"{t_file_name}: {self.t_sim_score}%")
         print("")
+
+    def print_to_file(self):
+        """
+        Append the similarity score between the
+        two analysed files to the results file.
+        """
+        s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
+        t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
+        results_file = "results.txt"
+        equal = False
+        if filecmp.cmp(self.source_file, self.target_file):
+            equal=True
+
+        with open(results_file, 'a') as file:
+            file.write("\n")
+            if self.s_error > 0 or self.t_error > 0:
+                file.write(f"COMPARISON: {s_file_name} <--> {t_file_name}: ERROR\n")
+                file.write(f"{s_file_name}: {self.ERRORS[self.s_error]}    ")
+                file.write(f"{t_file_name}: {self.ERRORS[self.t_error]}\n")
+                file.write("\n")
+                return
+
+            if equal:
+                file.write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}% (EQUAL)\n")
+            else:
+                file.write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}%\n")
+            file.write(f"{s_file_name}: {self.s_sim_score}%    ")
+            file.write(f"{t_file_name}: {self.t_sim_score}%\n")
