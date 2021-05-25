@@ -52,10 +52,14 @@ class Result():
 
         with open(self.source_file) as s, open(self.target_file) as t:
             outputHTML = template.render(
+                source_file_name=self.source_file,
+                target_file_name=self.target_file,
                 source_lines=source_lines,
                 target_lines=target_lines,
                 source_file=s,
                 target_file=t,
+                s_sim_score=self.s_sim_score,
+                t_sim_score=self.t_sim_score,
                 mode=self.SIMILARITIES
             )
 
@@ -82,9 +86,13 @@ class Result():
 
         with open(self.source_file) as s, open(self.target_file) as t:
             outputHTML = template.render(
+                source_file_name=self.source_file,
+                target_file_name=self.target_file,
                 reorderings=json.dumps(reorderings),
                 source_file=s,
                 target_file=t,
+                s_sim_score=self.s_sim_score,
+                t_sim_score=self.t_sim_score,
                 mode=self.REORDERINGS
             )
 

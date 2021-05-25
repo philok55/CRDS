@@ -78,6 +78,8 @@
 
         <div id="col-1" class="pl-4">
             <h3>SOURCE FILE</h3>
+            <h6>File: {{ source_file_name }}  =>  {{ s_sim_score }}% similar</h6>
+            <hr>
             {% for line in source_file %}
                 {% if loop.index in source_lines %}
                     <pre><code class="highlight">{{ line }}</code></pre>
@@ -89,6 +91,8 @@
 
         <div id="col-2" class="pl-4">
             <h3>TARGET FILE</h3>
+            <h6>File: {{ target_file_name }}  =>  {{ t_sim_score }}% similar</h6>
+            <hr>
             {% for line in target_file %}
                 {% if loop.index in target_lines %}
                     <pre><code class="highlight">{{ line }}</code></pre>
@@ -102,6 +106,8 @@
 
         <div id="col-1" class="pl-4">
             <h3>SOURCE FILE</h3>
+            <h6>File: {{ source_file_name }}  =>  {{ s_sim_score }}% similar</h6>
+            <hr>
             {% for line in source_file %}
                 <pre><code id="s_{{ loop.index }}">{{ line }}</code></pre>
             {% endfor %}
@@ -109,6 +115,8 @@
 
         <div id="col-2" class="pl-4">
             <h3>TARGET FILE</h3>
+            <h6>File: {{ target_file_name }}  =>  {{ t_sim_score }}% similar</h6>
+            <hr>
             {% for line in target_file %}
                 <pre><code id="t_{{ loop.index }}">{{ line }}</code></pre>
             {% endfor %}
