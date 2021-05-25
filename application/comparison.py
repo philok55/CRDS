@@ -98,6 +98,8 @@ class Comparison():
         matched = []
         s_children = source.get_children()
         t_children = target.get_children()
+        s_hashes = [c.hash_value for c in s_children]
+        t_hashes = [c.hash_value for c in t_children]
         for i, s_child in enumerate(s_children):
             for j, t_child in enumerate(t_children):
                 if j in matched:
