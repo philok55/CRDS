@@ -33,7 +33,6 @@ class Result():
         self.t_error = t_error
         self.reorderings = reorderings
 
-
     def render_ui(self):
         """
         Renders a simple highlighting UI to HTML,
@@ -104,6 +103,9 @@ class Result():
         """Prints the similarity score between the two analysed files."""
         s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
         t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
+        equal = False
+        if filecmp.cmp(self.source_file, self.target_file):
+            equal=True
 
         print("")
         if self.s_error > 0 or self.t_error > 0:
@@ -113,8 +115,11 @@ class Result():
             print("")
             return
 
-        print(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}")
-        print(f"{s_file_name}: {self.s_sim_score}%")
+        if equal:
+            print(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}% (EQUAL)")
+        else:
+            print(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}%")
+        print(f"{s_file_name}: {self.s_sim_score}%    ", end='')
         print(f"{t_file_name}: {self.t_sim_score}%")
         print("")
 

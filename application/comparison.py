@@ -60,7 +60,8 @@ class Comparison():
                 -1,
                 None, None,
                 self.source.error,
-                self.target.error
+                self.target.error,
+                self.reorderings
             )
 
         source_sim_lines = []
