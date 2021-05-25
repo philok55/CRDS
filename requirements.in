@@ -2,3 +2,4 @@ antlr4-python3-runtime
 pylint
 psutil
 numpy
+jinja2

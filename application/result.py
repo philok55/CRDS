@@ -1,4 +1,5 @@
 import filecmp
+from .renderer.render import Renderer
 
 class Result():
     HL_COLOR = '\033[91m'
@@ -141,6 +142,8 @@ class Result():
         Append the similarity score between the
         two analysed files to the results file.
         """
+        renderer = Renderer([])
+        renderer.render()
         s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
         t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
         results_file = "results.txt"
