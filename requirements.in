@@ -1,4 +1,4 @@
 antlr4-python3-runtime
 pylint
 psutil
-python-Levenshtein
+numpy

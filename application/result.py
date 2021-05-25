@@ -86,12 +86,10 @@ class Result():
         """
         source_sim_lines = []
         target_sim_lines = []
-        reorder = self.reorderings[0]
-        for sim in reorder:
-            print(sim)
-            print(sim[0][1][0])
-            source_sim_lines += range(sim[0][0][0], sim[0][1][0] + 1)
-            target_sim_lines += range(sim[1][0][0], sim[1][1][0] + 1)
+        for reorder in self.reorderings:
+            for sim in reorder:
+                source_sim_lines += range(sim[0][0][0], sim[0][1][0] + 1)
+                target_sim_lines += range(sim[1][0][0], sim[1][1][0] + 1)
         target_sim_lines = set(target_sim_lines)
         source_sim_lines = set(source_sim_lines)
 

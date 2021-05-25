@@ -1,5 +1,6 @@
 from .submission import Submission
 from .result import Result
+from .levenshtein import Levenshtein
 
 class Comparison():
     # Minimum size for a sub tree to be compared
@@ -95,43 +96,21 @@ class Comparison():
 
     def find_reordering(self, source, target):
         reordering = []
-        matched = []
         s_children = source.get_children()
         t_children = target.get_children()
         s_hashes = [c.hash_value for c in s_children]
         t_hashes = [c.hash_value for c in t_children]
-        for i, s_child in enumerate(s_children):
-            for j, t_child in enumerate(t_children):
-                if j in matched:
-                    continue
-                if s_child.hash_value == t_child.hash_value:
-                    if i != j:
-                        # add reordering
-                        reordering.append((
-                            s_child.get_file_location(),
-                            t_child.get_file_location()
-                        ))
-                    # save index
-                    matched.append(j)
-                    break
+        levenshtein = Levenshtein()
+        edit_ops = levenshtein.get_ops(s_hashes, t_hashes, is_damerau=True)
+        # Since we only search for reorderings, we only
+        # expect 'transpose' operations here
+        for op in edit_ops:
+            if op[0] != 'transpose':
+                return  # TODO: what do we do here??
+            s_child = s_children[op[1]]
+            t_child = t_children[op[2]]
+            reordering.append((
+                s_child.get_file_location(),
+                t_child.get_file_location()
+            ))
         self.reorderings.append(reordering)
-
-    def levenshteinDistance(self, s1, s2):
-        """
-        Levenshtein Distance between two lists.
-        Nice Dynamic Programming solution from source:
-        https://stackoverflow.com/a/32558749
-        """
-        if len(s1) > len(s2):
-            s1, s2 = s2, s1
-
-        distances = range(len(s1) + 1)
-        for i2, c2 in enumerate(s2):
-            distances_ = [i2+1]
-            for i1, c1 in enumerate(s1):
-                if c1 == c2:
-                    distances_.append(distances[i1])
-                else:
-                    distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
-            distances = distances_
-        return distances[-1]
