@@ -5,3 +5,5 @@ test_input/
 .antlr/
 results.txt
 tree.txt
+reo_results.html
+sim_results.html

@@ -64,8 +64,9 @@ class PlagiarismChecker():
             self.results[i].print_similarity_score()
             step = input(
                 "Select an action (press letter and then enter): \n\n\
-                 u = See User Interface (inverse diff) \n\
-                 r = See Reorderings \n\
+                 u = Render Similarities to sim_results.html \n\
+                 r = Render Reorderings to reo_results.html \n\
+                 b = Render both UIs to HTML \n\
                  n = Go to next submission \n\
                  p = Go to previous submission \n\
                  q = Quit\n")
@@ -75,11 +76,12 @@ class PlagiarismChecker():
                 else:
                     i -= 1
             elif step == 'u':
-                self.results[i].print_ui()
-                i += 1
+                self.results[i].render_ui()
             elif step == 'r':
-                self.results[i].print_reorderings()
-                i += 1
+                self.results[i].render_reorderings()
+            elif step == 'b':
+                self.results[i].render_ui()
+                self.results[i].render_reorderings()
             elif step in ['n', '']:
                 i += 1
             elif step == 'q':

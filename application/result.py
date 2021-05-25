@@ -1,15 +1,17 @@
 import filecmp
-from .renderer.render import Renderer
+import json
+from jinja2 import Template
 
 class Result():
-    HL_COLOR = '\033[91m'
-    STD_COLOR = '\033[0m'
-
     ERRORS = {
         0: 'No error in this file.',
         1: 'Error during lexing stage.',
         2: 'Error during parsing stage.'
     }
+    TEMPLATE_FILE = "ui_template.html"
+    SIMILARITIES = 'sim'
+    REORDERINGS = 'reo'
+    OUT_FILES = {"sim": "sim_results.html", "reo": "reo_results.html"}
 
     def __init__(self,
                  source_file,
@@ -32,92 +34,63 @@ class Result():
         self.reorderings = reorderings
 
 
-    def print_ui(self):
+    def render_ui(self):
         """
-        Prints a simple highlighting UI to the terminal,
+        Renders a simple highlighting UI to HTML,
         displaying similarities between two files.
         """
-        source_sim_lines = []
-        target_sim_lines = []
+        source_lines = []
+        target_lines = []
         for sim in self.similarities:
-            source_sim_lines += range(sim[0][0][0], sim[0][1][0] + 1)
-            target_sim_lines += range(sim[1][0][0], sim[1][1][0] + 1)
-        target_sim_lines = set(target_sim_lines)
-        source_sim_lines = set(source_sim_lines)
+            source_lines += range(sim[0][0][0], sim[0][1][0] + 1)
+            target_lines += range(sim[1][0][0], sim[1][1][0] + 1)
+        target_lines = set(target_lines)
+        source_lines = set(source_lines)
 
-        print("-----------------------------------------------------------")
-        print(f"SOURCE FILE: {self.source_file}")
-        print("-----------------------------------------------------------")
-        print("\n")
-        with open(self.source_file) as s:
-            s_line_count = 0
-            for i, line in enumerate(s):
-                s_line_count += 1
-                if i+1 in source_sim_lines:
-                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
-                else:
-                    print(line, end='')
+        with open(self.TEMPLATE_FILE) as f:
+            template = Template(f.read())
 
-        print("\n\n\n")
-        print("-----------------------------------------------------------")
-        print(f"TARGET FILE: {self.target_file}")
-        print("-----------------------------------------------------------")
-        print("\n")
-        with open(self.target_file) as t:
-            t_line_count = 0
-            for i, line in enumerate(t):
-                t_line_count += 1
-                if i+1 in target_sim_lines:
-                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
-                else:
-                    print(line, end='')
+        with open(self.source_file) as s, open(self.target_file) as t:
+            outputHTML = template.render(
+                source_lines=source_lines,
+                target_lines=target_lines,
+                source_file=s,
+                target_file=t,
+                mode=self.SIMILARITIES
+            )
 
-        print("\n\n\n")
+        out_file = self.OUT_FILES[self.SIMILARITIES]
+        with open(out_file, 'w') as f:
+            f.write(outputHTML)
 
-        s_sim_score = round(len(source_sim_lines) / s_line_count * 100, 2)
-        t_sim_score = round(len(target_sim_lines) / t_line_count * 100, 2)
-        print(f"SIMILARITY IN SOURCE FILE: {s_sim_score}%")
-        print(f"SIMILARITY IN TARGET FILE: {t_sim_score}%")
-        print("\n")
-
-    def print_reorderings(self):
+    def render_reorderings(self):
         """
-        Prints a simple highlighting UI to the terminal,
+        Renders a simple highlighting UI to a HTML file,
         displaying reorderings between two files.
         """
-        source_sim_lines = []
-        target_sim_lines = []
+        reorderings = []
         for reorder in self.reorderings:
-            for sim in reorder:
-                source_sim_lines += range(sim[0][0][0], sim[0][1][0] + 1)
-                target_sim_lines += range(sim[1][0][0], sim[1][1][0] + 1)
-        target_sim_lines = set(target_sim_lines)
-        source_sim_lines = set(source_sim_lines)
+            s_sw_lines = []
+            t_sw_lines = []
+            for switch in reorder:
+                s_sw_lines += range(switch[0][0][0], switch[0][1][0] + 1)
+                t_sw_lines += range(switch[1][0][0], switch[1][1][0] + 1)
+            reorderings.append([list(set(s_sw_lines)), list(set(t_sw_lines))])
 
-        print("-----------------------------------------------------------")
-        print(f"SOURCE FILE: {self.source_file}")
-        print("-----------------------------------------------------------")
-        print("\n")
-        with open(self.source_file) as s:
-            for i, line in enumerate(s):
-                if i+1 in source_sim_lines:
-                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
-                else:
-                    print(line, end='')
+        with open(self.TEMPLATE_FILE) as f:
+            template = Template(f.read())
 
-        print("\n\n\n")
-        print("-----------------------------------------------------------")
-        print(f"TARGET FILE: {self.target_file}")
-        print("-----------------------------------------------------------")
-        print("\n")
-        with open(self.target_file) as t:
-            for i, line in enumerate(t):
-                if i+1 in target_sim_lines:
-                    print(f"{self.HL_COLOR}{line}{self.STD_COLOR}", end='')
-                else:
-                    print(line, end='')
+        with open(self.source_file) as s, open(self.target_file) as t:
+            outputHTML = template.render(
+                reorderings=json.dumps(reorderings),
+                source_file=s,
+                target_file=t,
+                mode=self.REORDERINGS
+            )
 
-        print("\n\n\n")
+        out_file = self.OUT_FILES[self.REORDERINGS]
+        with open(out_file, 'w') as f:
+            f.write(outputHTML)
 
     def print_similarity_score(self):
         """Prints the similarity score between the two analysed files."""
@@ -142,8 +115,6 @@ class Result():
         Append the similarity score between the
         two analysed files to the results file.
         """
-        renderer = Renderer([])
-        renderer.render()
         s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
         t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
         results_file = "results.txt"
