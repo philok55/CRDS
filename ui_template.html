@@ -78,7 +78,6 @@
         </style>
     </head>
     <body class="bg-gray h-100">
-        {% if mode == 'sim' %}
 
         <div id="col-1" class="pl-4">
             <h3>SOURCE FILE</h3>
@@ -123,54 +122,6 @@
                 {% endif %}
             {% endfor %}
         </div>
-
-        {% else %}
-
-        <div id="col-1" class="pl-4">
-            <h3>SOURCE FILE</h3>
-            <h6>File: {{ source_file_name }}  =>  {{ s_sim_score }}% similar</h6>
-            <hr>
-            {% for line in source_file %}
-                {% if loop.index not in source_lines %}
-                    <pre><code>{{ line|e }}</code></pre>
-                {% else %}
-                    {% set split = source_lines[loop.index] %}
-                    {% if split[1:] == ('-', '-') %}
-                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line|e }}</code></pre>
-                    {% elif split[1] == '-' %}
-                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line[:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
-                    {% elif split[2] == '-' %}
-                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:]|e }}</code></pre>
-                    {% else %}
-                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        <div id="col-2" class="pl-4">
-            <h3>TARGET FILE</h3>
-            <h6>File: {{ target_file_name }}  =>  {{ t_sim_score }}% similar</h6>
-            <hr>
-            {% for line in target_file %}
-                {% if loop.index not in target_lines %}
-                    <pre><code>{{ line|e }}</code></pre>
-                {% else %}
-                    {% set split = target_lines[loop.index] %}
-                    {% if split[1:] == ('-', '-') %}
-                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line|e }}</code></pre>
-                    {% elif split[1] == '-' %}
-                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line[:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
-                    {% elif split[2] == '-' %}
-                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:]|e }}</code></pre>
-                    {% else %}
-                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        {% endif %}
 
     </body>
 
