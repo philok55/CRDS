@@ -31,7 +31,7 @@ class HashedNode():
         return ret
 
     def __repr__(self):
-        return '<Hashed Node>'
+        return f'<Hashed Node>{self.sub_tree_size}'
 
     def add_child(self, ctx:ParserRuleContext):
         """Add a child to this node."""
