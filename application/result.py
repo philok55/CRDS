@@ -41,7 +41,6 @@ class Result():
         source_lines = {}
         target_lines = {}
         for i, sim in enumerate(self.similarities):
-            print(sim)
             for line in range(sim[0][0][0], sim[0][1][0] + 1):
                 if line in source_lines and source_lines[line][1:] == ('-', '-'):
                     continue
