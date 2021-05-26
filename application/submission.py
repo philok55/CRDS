@@ -53,5 +53,5 @@ class Submission():
             self.tree = builder.hashed_tree
             self.sub_trees = builder.sorted_trees
             self.sizes = sorted(builder.sub_tree_sizes, reverse=True)
-        except UnicodeDecodeError:
+        except UnicodeDecodeError as err:
             self.error = self.LEXER_ERROR

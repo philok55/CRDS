@@ -38,13 +38,33 @@ class Result():
         Renders a simple highlighting UI to HTML,
         displaying similarities between two files.
         """
-        source_lines = []
-        target_lines = []
-        for sim in self.similarities:
-            source_lines += range(sim[0][0][0], sim[0][1][0] + 1)
-            target_lines += range(sim[1][0][0], sim[1][1][0] + 1)
-        target_lines = set(target_lines)
-        source_lines = set(source_lines)
+        source_lines = {}
+        target_lines = {}
+        for i, sim in enumerate(self.similarities):
+            print(sim)
+            for line in range(sim[0][0][0], sim[0][1][0] + 1):
+                if line in source_lines and source_lines[line][1:] == ('-', '-'):
+                    continue
+                if sim[0][0][0] == sim[0][1][0]:
+                    source_lines[line] = (i, sim[0][0][1], sim[0][1][1])
+                elif line == sim[0][0][0]:
+                    source_lines[line] = (i, sim[0][0][1], '-')
+                elif line == sim[0][1][0]:
+                    source_lines[line] = (i, '-', sim[0][1][1])
+                else:
+                    source_lines[line] = (i, '-', '-')
+
+            for line in range(sim[1][0][0], sim[1][1][0] + 1):
+                if line in target_lines and target_lines[line][1:] == ('-', '-'):
+                    continue
+                if sim[1][0][0] == sim[1][1][0]:
+                    target_lines[line] = (i, sim[1][0][1], sim[1][1][1])
+                elif line == sim[1][0][0]:
+                    target_lines[line] = (i, sim[1][0][1], '-')
+                elif line == sim[1][1][0]:
+                    target_lines[line] = (i, '-', sim[1][1][1])
+                else:
+                    target_lines[line] = (i, '-', '-')
 
         with open(self.TEMPLATE_FILE) as f:
             template = Template(f.read())
@@ -71,14 +91,31 @@ class Result():
         Renders a simple highlighting UI to a HTML file,
         displaying reorderings between two files.
         """
-        reorderings = []
-        for reorder in self.reorderings:
-            s_sw_lines = []
-            t_sw_lines = []
+        source_lines = {}
+        target_lines = {}
+        for i, reorder in enumerate(self.reorderings):
             for switch in reorder:
-                s_sw_lines += range(switch[0][0][0], switch[0][1][0] + 1)
-                t_sw_lines += range(switch[1][0][0], switch[1][1][0] + 1)
-            reorderings.append([list(set(s_sw_lines)), list(set(t_sw_lines))])
+                for line in range(switch[0][0][0], switch[0][1][0] + 1):
+                    if switch[0][0][0] == switch[0][1][0]:
+                        # Only one line
+                        source_lines[line] = (i, switch[0][0][1], switch[0][1][1])
+                    elif line == switch[0][0][0]:
+                        source_lines[line] = (i, switch[0][0][1], '-')
+                    elif line == switch[0][1][0]:
+                        source_lines[line] = (i, '-', switch[0][1][1])
+                    else:
+                        source_lines[line] = (i, '-', '-')
+
+                for line in range(switch[1][0][0], switch[1][1][0] + 1):
+                    if switch[1][0][0] == switch[1][1][0]:
+                        # Only one line
+                        target_lines[line] = (i, switch[1][0][1], switch[1][1][1])
+                    elif line == switch[1][0][0]:
+                        target_lines[line] = (i, switch[1][0][1], '-')
+                    elif line == switch[1][1][0]:
+                        target_lines[line] = (i, '-', switch[1][1][1])
+                    else:
+                        target_lines[line] = (i, '-', '-')
 
         with open(self.TEMPLATE_FILE) as f:
             template = Template(f.read())
@@ -87,7 +124,8 @@ class Result():
             outputHTML = template.render(
                 source_file_name=self.source_file,
                 target_file_name=self.target_file,
-                reorderings=json.dumps(reorderings),
+                source_lines=source_lines,
+                target_lines=target_lines,
                 source_file=s,
                 target_file=t,
                 s_sim_score=self.s_sim_score,

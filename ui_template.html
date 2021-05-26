@@ -45,6 +45,9 @@
             .highlight {
                 background-color: rgba(255, 0, 0, 0.3);
             }
+            .highlight0 {
+                background-color: rgba(184, 167, 118, 0.3);
+            }
             .highlight1 {
                 background-color: rgba(255, 0, 0, 0.3);
             }
@@ -72,9 +75,6 @@
             .highlight9 {
                 background-color: rgba(184, 167, 118, 0.3);
             }
-            .highlight10 {
-                background-color: rgba(184, 167, 118, 0.3);
-            }
         </style>
     </head>
     <body class="bg-gray h-100">
@@ -85,10 +85,19 @@
             <h6>File: {{ source_file_name }}  =>  {{ s_sim_score }}% similar</h6>
             <hr>
             {% for line in source_file %}
-                {% if loop.index in source_lines %}
-                    <pre><code class="highlight">{{ line|e }}</code></pre>
-                {% else %}
+                {% if loop.index not in source_lines %}
                     <pre><code>{{ line|e }}</code></pre>
+                {% else %}
+                    {% set split = source_lines[loop.index] %}
+                    {% if split[1:] == ('-', '-') %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line|e }}</code></pre>
+                    {% elif split[1] == '-' %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line[:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% elif split[2] == '-' %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:]|e }}</code></pre>
+                    {% else %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </div>
@@ -98,10 +107,19 @@
             <h6>File: {{ target_file_name }}  =>  {{ t_sim_score }}% similar</h6>
             <hr>
             {% for line in target_file %}
-                {% if loop.index in target_lines %}
-                    <pre><code class="highlight">{{ line|e }}</code></pre>
-                {% else %}
+                {% if loop.index not in target_lines %}
                     <pre><code>{{ line|e }}</code></pre>
+                {% else %}
+                    {% set split = target_lines[loop.index] %}
+                    {% if split[1:] == ('-', '-') %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line|e }}</code></pre>
+                    {% elif split[1] == '-' %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line[:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% elif split[2] == '-' %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:]|e }}</code></pre>
+                    {% else %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </div>
@@ -113,7 +131,20 @@
             <h6>File: {{ source_file_name }}  =>  {{ s_sim_score }}% similar</h6>
             <hr>
             {% for line in source_file %}
-                <pre><code id="s_{{ loop.index }}">{{ line|e }}</code></pre>
+                {% if loop.index not in source_lines %}
+                    <pre><code>{{ line|e }}</code></pre>
+                {% else %}
+                    {% set split = source_lines[loop.index] %}
+                    {% if split[1:] == ('-', '-') %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line|e }}</code></pre>
+                    {% elif split[1] == '-' %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line[:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% elif split[2] == '-' %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:]|e }}</code></pre>
+                    {% else %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% endif %}
+                {% endif %}
             {% endfor %}
         </div>
 
@@ -122,39 +153,22 @@
             <h6>File: {{ target_file_name }}  =>  {{ t_sim_score }}% similar</h6>
             <hr>
             {% for line in target_file %}
-                <pre><code id="t_{{ loop.index }}">{{ line|e }}</code></pre>
+                {% if loop.index not in target_lines %}
+                    <pre><code>{{ line|e }}</code></pre>
+                {% else %}
+                    {% set split = target_lines[loop.index] %}
+                    {% if split[1:] == ('-', '-') %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line|e }}</code></pre>
+                    {% elif split[1] == '-' %}
+                        <pre><code class="highlight{{ split[0] % 10 }}">{{ line[:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% elif split[2] == '-' %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:]|e }}</code></pre>
+                    {% else %}
+                        <pre><code>{{ line[:split[1]]|e }}</code><code class="highlight{{ split[0] % 10 }}">{{ line[split[1]:split[2]]|e }}</code><code>{{ line[split[2]:]|e }}</code></pre>
+                    {% endif %}
+                {% endif %}
             {% endfor %}
         </div>
-
-        <script>
-        $(document).ready(function() {
-            var colors = [
-                "highlight1",
-                "highlight2",
-                "highlight3",
-                "highlight4",
-                "highlight5",
-                "highlight6",
-                "highlight7",
-                "highlight8",
-                "highlight9",
-                "highlight10",
-            ];
-
-            var reorderings = {{ reorderings|safe }};
-            reorderings.forEach(function (item, index) {
-                var color = colors[index % colors.length];
-                s_lines = item[0];
-                t_lines = item[1];
-                s_lines.forEach(function (item, index) {
-                    $(`#s_${item}`).addClass(color);
-                });
-                t_lines.forEach(function (item, index) {
-                    $(`#t_${item}`).addClass(color);
-                });
-            });
-        });
-        </script>
 
         {% endif %}
 

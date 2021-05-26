@@ -4,7 +4,7 @@ from .levenshtein import Levenshtein
 
 class Comparison():
     # Minimum size for a sub tree to be compared
-    TREE_SIZE_THRESHOLD = 7
+    TREE_SIZE_THRESHOLD = 10
 
     def __init__(self, source, target):
         self.source = source
