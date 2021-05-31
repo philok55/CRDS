@@ -2,8 +2,7 @@
 
 import os
 import sys
-from antlr4 import FileStream
-from application.plagiarism_checker import PlagiarismChecker
+from crds.crds import CRDS
 
 
 SUPPORTED_EXTENSIONS = ['py', 'c']
@@ -43,7 +42,7 @@ def main(argv):
             else:
                 print(f"File {file} skipped: file type not supported.")
 
-    checker = PlagiarismChecker(files, selected_ext)
+    checker = CRDS(files, selected_ext)
     checker.run()
 
 

@@ -10,7 +10,7 @@ import os
 import psutil
 
 
-class PlagiarismChecker():
+class CRDS():
     """
     The main plagiarism checking class.
     It reads the files and executes the comparison.

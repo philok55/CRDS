@@ -1,5 +1,4 @@
 import filecmp
-import json
 from jinja2 import Template
 
 class Result():

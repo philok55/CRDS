@@ -6,7 +6,7 @@ from antlr4 import ParseTreeWalker
 from antlr4.tree.Tree import TerminalNode
 from parsers.C.CListener import CListener
 from parsers.C.CParser import CParser
-from hash_tree.hash_tree import HashedNode
+from ..hash_tree.hash_tree import HashedNode
 
 
 class CTreeBuilder(CListener):

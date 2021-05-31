@@ -6,7 +6,7 @@ from antlr4 import ParseTreeWalker
 from antlr4.tree.Tree import TerminalNode
 from parsers.python3.Python3Listener import Python3Listener
 from parsers.python3.Python3Parser import Python3Parser
-from hash_tree.hash_tree import HashedNode
+from ..hash_tree.hash_tree import HashedNode
 
 
 class PythonTreeBuilder(Python3Listener):

@@ -2,7 +2,6 @@
 
 import hashlib
 from antlr4 import ParserRuleContext
-from antlr4.tree.Tree import TerminalNode
 
 
 class HashedNode():

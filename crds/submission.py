@@ -3,8 +3,8 @@ from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
 from parsers.C.CLexer import CLexer
 from parsers.C.CParser import CParser
-from hash_tree.tree_builders.python_tree_builder import PythonTreeBuilder
-from hash_tree.tree_builders.c_tree_builder import CTreeBuilder
+from .tree_builders.python_tree_builder import PythonTreeBuilder
+from .tree_builders.c_tree_builder import CTreeBuilder
 
 
 class Submission():
