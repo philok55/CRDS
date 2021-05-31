@@ -33,46 +33,49 @@ class Comparison():
             self.error = True
             return False
         for size in self.source.sizes:
-            if size < self.TREE_SIZE_THRESHOLD:
+            if size < self.TREE_SIZE_THRESHOLD and not find_reordering:
+                break
+            elif size < 4 and find_reordering:
                 break
             if size not in self.target.sub_trees:
                 continue
             for s_subtree in self.source.sub_trees[size]:
                 for t_subtree in self.target.sub_trees[size]:
                     if s_subtree.hash_value == t_subtree.hash_value:
-                        self.similarities.append((
-                            s_subtree.get_file_location(),
-                            t_subtree.get_file_location()
-                        ))
+                        if size >= self.TREE_SIZE_THRESHOLD:
+                            self.similarities.append((
+                                s_subtree.get_file_location(),
+                                t_subtree.get_file_location()
+                            ))
                         if find_reordering and s_subtree.exact_hash != t_subtree.exact_hash:
-                            s_leaves = {}
-                            t_leaves = {}
-                            s_hashes = []
-                            t_hashes = []
-                            for c in s_subtree.get_children():
-                                s_hashes.append(c.hash_value)
-                                c_size = c.sub_tree_size
-                                if c_size <= self.TREE_SIZE_THRESHOLD:
-                                    if c_size not in s_leaves:
-                                        s_leaves[c_size] = []
-                                    s_leaves[c_size].append(c)
+                            # s_leaves = {}
+                            # t_leaves = {}
+                            # s_hashes = []
+                            # t_hashes = []
+                            # for c in s_subtree.get_children():
+                            #     s_hashes.append(c.hash_value)
+                            #     c_size = c.sub_tree_size
+                            #     if c_size <= self.TREE_SIZE_THRESHOLD:
+                            #         if c_size not in s_leaves:
+                            #             s_leaves[c_size] = []
+                            #         s_leaves[c_size].append(c)
                             
-                            for c in t_subtree.get_children():
-                                t_hashes.append(c.hash_value)
-                                c_size = c.sub_tree_size
-                                if c_size <= self.TREE_SIZE_THRESHOLD:
-                                    if c_size not in s_leaves:
-                                        continue
-                                    if c_size not in t_leaves:
-                                        t_leaves[c_size] = []
-                                    t_leaves[c_size].append(c)
+                            # for c in t_subtree.get_children():
+                            #     t_hashes.append(c.hash_value)
+                            #     c_size = c.sub_tree_size
+                            #     if c_size <= self.TREE_SIZE_THRESHOLD:
+                            #         if c_size not in s_leaves:
+                            #             continue
+                            #         if c_size not in t_leaves:
+                            #             t_leaves[c_size] = []
+                            #         t_leaves[c_size].append(c)
 
                             s_children = [c.hash_value for c in s_subtree.get_children()]
                             t_children = [c.hash_value for c in t_subtree.get_children()]
                             if s_children != t_children and set(s_children) == set(t_children):
                                 self.find_reordering(s_subtree, t_subtree)
 
-                            self.search_leaves(s_leaves, t_leaves)
+                            # self.search_leaves(s_leaves, t_leaves)
         return True
 
     def get_results(self):
@@ -140,58 +143,58 @@ class Comparison():
             ))
         self.reorderings.append(reordering)
 
-    def search_leaves(self, s_leaves, t_leaves):
-        print(s_leaves)
-        print(t_leaves)
-        print("")
-        for size, s_node_list in s_leaves.items():
-            if size not in t_leaves:
-                continue
-            for s_node in s_node_list:
-                for t_node in t_leaves[size]:
-                    self.find_recursive(s_node, t_node)
+    # def search_leaves(self, s_leaves, t_leaves):
+    #     print(s_leaves)
+    #     print(t_leaves)
+    #     print("")
+    #     for size, s_node_list in s_leaves.items():
+    #         if size not in t_leaves:
+    #             continue
+    #         for s_node in s_node_list:
+    #             for t_node in t_leaves[size]:
+    #                 self.find_recursive(s_node, t_node)
 
-    def find_recursive(self, s_node, t_node):
-        if s_node.sub_tree_size < 3:
-            return
+    # def find_recursive(self, s_node, t_node):
+    #     if s_node.sub_tree_size < 3:
+    #         return
 
-        reordering = []
-        s_children = s_node.get_children()
-        t_children = t_node.get_children()
-        s_leaves = {}
-        t_leaves = {}
-        s_hashes = []
-        t_hashes = []
-        for c in s_children:
-            s_hashes.append(c.hash_value)
-            c_size = c.sub_tree_size
-            if c_size not in s_leaves:
-                s_leaves[c_size] = []
-            s_leaves[c_size].append(c)
+    #     reordering = []
+    #     s_children = s_node.get_children()
+    #     t_children = t_node.get_children()
+    #     s_leaves = {}
+    #     t_leaves = {}
+    #     s_hashes = []
+    #     t_hashes = []
+    #     for c in s_children:
+    #         s_hashes.append(c.hash_value)
+    #         c_size = c.sub_tree_size
+    #         if c_size not in s_leaves:
+    #             s_leaves[c_size] = []
+    #         s_leaves[c_size].append(c)
         
-        for c in t_children:
-            t_hashes.append(c.hash_value)
-            c_size = c.sub_tree_size
-            if c_size not in s_leaves:
-                continue
-            if c_size not in t_leaves:
-                t_leaves[c_size] = []
-            t_leaves[c_size].append(c)
+    #     for c in t_children:
+    #         t_hashes.append(c.hash_value)
+    #         c_size = c.sub_tree_size
+    #         if c_size not in s_leaves:
+    #             continue
+    #         if c_size not in t_leaves:
+    #             t_leaves[c_size] = []
+    #         t_leaves[c_size].append(c)
 
-        if set(s_hashes) == set(t_hashes):
-            levenshtein = Levenshtein()
-            edit_ops = levenshtein.get_ops(s_hashes, t_hashes, is_damerau=True)
-            # Since we only search for reorderings, we only
-            # expect 'transpose' operations here
-            for op in edit_ops:
-                if op[0] != 'transpose':
-                    continue
-                s_child = s_children[op[1]]
-                t_child = t_children[op[2]]
-                reordering.append((
-                    s_child.get_file_location(),
-                    t_child.get_file_location()
-                ))
-            self.reorderings.append(reordering)
+    #     if set(s_hashes) == set(t_hashes):
+    #         levenshtein = Levenshtein()
+    #         edit_ops = levenshtein.get_ops(s_hashes, t_hashes, is_damerau=True)
+    #         # Since we only search for reorderings, we only
+    #         # expect 'transpose' operations here
+    #         for op in edit_ops:
+    #             if op[0] != 'transpose':
+    #                 continue
+    #             s_child = s_children[op[1]]
+    #             t_child = t_children[op[2]]
+    #             reordering.append((
+    #                 s_child.get_file_location(),
+    #                 t_child.get_file_location()
+    #             ))
+    #         self.reorderings.append(reordering)
 
-        self.search_leaves(s_leaves, t_leaves)
+    #     self.search_leaves(s_leaves, t_leaves)
