@@ -1,6 +1,6 @@
-# Bachelor Thesis of Philo Decroos
+# CRDS: Code Reordering Detection System
 
-This project is the implementation used for my Bachelor Thesis at the University of Amsterdam.
+This project is a Proof-of-Concept implementation used for my Bachelor Thesis at the University of Amsterdam.
 
 CRDS (Code Reordering Detection System) is a source-code plagiarism detection tool based on Abstract Syntax Trees.
 
