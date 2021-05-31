@@ -1,10 +1,12 @@
+"""
+Levenshtein and Damerau-Levenshtein algorithms from:
+https://stackoverflow.com/a/44654267/13033823
+"""
+
 import numpy as np
 
+
 class Levenshtein():
-    """
-    Levenshtein and Damerau-Levenshtein algorithms from:
-    https://stackoverflow.com/a/44654267/13033823
-    """
     def __init__(self):
         pass
 

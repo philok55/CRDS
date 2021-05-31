@@ -1,12 +1,28 @@
+"""
+The Result class contains the results of the CRDS algorithm between two submissions.
+
+It renders the similarity and reordering User Interfaces as HTML files.
+It can also print similarity scores to the command line or to a file.
+"""
+
 import filecmp
 from jinja2 import Template
 
+
 class Result():
+    """
+    The Result class contains the results of the CRDS algorithm between two submissions.
+
+    It renders the similarity and reordering User Interfaces as HTML files.
+    It can also print similarity scores to the command line or to a file.
+    """
+
     ERRORS = {
         0: 'No error in this file.',
         1: 'Error during lexing stage.',
         2: 'Error during parsing stage.'
     }
+
     TEMPLATE_FILE = "ui_template.html"
     SIMILARITIES = 'sim'
     REORDERINGS = 'reo'
@@ -95,7 +111,6 @@ class Result():
             for switch in reorder:
                 for line in range(switch[0][0][0], switch[0][1][0] + 1):
                     if switch[0][0][0] == switch[0][1][0]:
-                        # Only one line
                         source_lines[line] = (i, switch[0][0][1], switch[0][1][1])
                     elif line == switch[0][0][0]:
                         source_lines[line] = (i, switch[0][0][1], '-')
@@ -106,7 +121,6 @@ class Result():
 
                 for line in range(switch[1][0][0], switch[1][1][0] + 1):
                     if switch[1][0][0] == switch[1][1][0]:
-                        # Only one line
                         target_lines[line] = (i, switch[1][0][1], switch[1][1][1])
                     elif line == switch[1][0][0]:
                         target_lines[line] = (i, switch[1][0][1], '-')
@@ -135,54 +149,33 @@ class Result():
         with open(out_file, 'w') as f:
             f.write(outputHTML)
 
-    def print_similarity_score(self):
-        """Prints the similarity score between the two analysed files."""
+    def print_similarity_score(self, file=None):
         s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
         t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
         equal = False
         if filecmp.cmp(self.source_file, self.target_file):
             equal=True
 
-        print("")
+        if file is not None:
+            f = open(file, 'a')
+            write = f.write
+        else:
+            write = print
+
+        write("\n")
         if self.s_error > 0 or self.t_error > 0:
-            print(f"COMPARISON: {s_file_name} <--> {t_file_name}: ERROR")
-            print(f"{s_file_name}: {self.ERRORS[self.s_error]}")
-            print(f"{t_file_name}: {self.ERRORS[self.t_error]}")
-            print("")
+            write(f"COMPARISON: {s_file_name} <--> {t_file_name}: ERROR\n")
+            write(f"{s_file_name}: {self.ERRORS[self.s_error]}    ")
+            write(f"{t_file_name}: {self.ERRORS[self.t_error]}\n")
+            write("\n")
             return
 
         if equal:
-            print(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}% (EQUAL)")
+            write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}% (EQUAL)\n")
         else:
-            print(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}%")
-        print(f"{s_file_name}: {self.s_sim_score}%    ", end='')
-        print(f"{t_file_name}: {self.t_sim_score}%")
-        print("")
+            write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}%\n")
+        write(f"{s_file_name}: {self.s_sim_score}%    ")
+        write(f"{t_file_name}: {self.t_sim_score}%\n")
 
-    def print_to_file(self):
-        """
-        Append the similarity score between the
-        two analysed files to the results file.
-        """
-        s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
-        t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
-        results_file = "results.txt"
-        equal = False
-        if filecmp.cmp(self.source_file, self.target_file):
-            equal=True
-
-        with open(results_file, 'a') as file:
-            file.write("\n")
-            if self.s_error > 0 or self.t_error > 0:
-                file.write(f"COMPARISON: {s_file_name} <--> {t_file_name}: ERROR\n")
-                file.write(f"{s_file_name}: {self.ERRORS[self.s_error]}    ")
-                file.write(f"{t_file_name}: {self.ERRORS[self.t_error]}\n")
-                file.write("\n")
-                return
-
-            if equal:
-                file.write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}% (EQUAL)\n")
-            else:
-                file.write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}%\n")
-            file.write(f"{s_file_name}: {self.s_sim_score}%    ")
-            file.write(f"{t_file_name}: {self.t_sim_score}%\n")
+        if file is not None:
+            f.close()

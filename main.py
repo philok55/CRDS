@@ -1,4 +1,4 @@
-"""Main entry point for the plagiarism checker module."""
+"""Main entry point for the CRDS plagiarism checker."""
 
 import os
 import sys

@@ -1,12 +1,30 @@
+"""
+A Comparison object is used to compare to Submission objects.
+
+It contains the actual comparison algorithm that is run between two Submissions.
+
+The CCS-based similarity check and the CRDS reordering detection are executed
+in the same traversal of the submissions.
+"""
+
 from .submission import Submission
 from .result import Result
 from .levenshtein import Levenshtein
 
 class Comparison():
+    """
+    A Comparison object is used to compare to Submission objects.
+
+    Call run_crds to execute the CRDS algorithm.
+    """
+
     # Minimum size for a sub tree to be compared
     TREE_SIZE_THRESHOLD = 10
 
     def __init__(self, source, target):
+        """
+        Call __init__ with source:Submission and target:Submission
+        """
         self.source = source
         self.target = target
         self.similarities = []
@@ -16,13 +34,18 @@ class Comparison():
         self.error = False
         self.reorderings = []
 
-    def similarity_check_ccs(self, find_reordering=False):
+    def run_crds(self, similarity_only=False):
         """
-        The comparison algorithm from the CCS paper:
+        The main CRDS comparison and decection algorithms.
+
+        The comparison algorithm is based on the CCS paper:
         https://doi.org/10.1109/ICBNMT.2010.5705174.
 
         Both trees are compared in linear form,
         cross-comparing sub trees of the same size.
+
+        Call with similarity_only=True to only execute the
+        similarity checks.
         """
         if self.source.tree is None:
             self.source.build_hash_trees()
@@ -39,42 +62,120 @@ class Comparison():
                 continue
             for s_subtree in self.source.sub_trees[size]:
                 for t_subtree in self.target.sub_trees[size]:
-                    if s_subtree.hash_value == t_subtree.hash_value:
-                        self.similarities.append((
-                            s_subtree.get_file_location(),
-                            t_subtree.get_file_location()
-                        ))
+                    if s_subtree.hash_value != t_subtree.hash_value:
+                        continue  # Subtrees are not equal
 
-                        if find_reordering and s_subtree.exact_hash != t_subtree.exact_hash:
-                            s_leaves = {}
-                            t_leaves = {}
-                            s_hashes = []
-                            t_hashes = []
-                            for c in s_subtree.get_children():
-                                s_hashes.append(c.hash_value)
-                                c_size = c.sub_tree_size
-                                if c_size <= self.TREE_SIZE_THRESHOLD:
-                                    if c_size not in s_leaves:
-                                        s_leaves[c_size] = []
-                                    s_leaves[c_size].append(c)
-                            
-                            for c in t_subtree.get_children():
-                                t_hashes.append(c.hash_value)
-                                c_size = c.sub_tree_size
-                                if c_size <= self.TREE_SIZE_THRESHOLD:
-                                    if c_size not in s_leaves:
-                                        continue
-                                    if c_size not in t_leaves:
-                                        t_leaves[c_size] = []
-                                    t_leaves[c_size].append(c)
+                    self.similarities.append((
+                        s_subtree.get_file_location(),
+                        t_subtree.get_file_location()
+                    ))
 
-                            if s_hashes != t_hashes and set(s_hashes) == set(t_hashes):
-                                self.find_reordering(s_subtree, t_subtree)
+                    if similarity_only or s_subtree.exact_hash == t_subtree.exact_hash:
+                        continue  # No need to look for reorderings
 
-                            self.search_leaves(s_leaves, t_leaves)
+                    s_hashes, t_hashes, s_sub_thr, t_sub_thr = self.analyse_children(s_subtree, t_subtree)
+
+                    if s_hashes != t_hashes and set(s_hashes) == set(t_hashes):
+                        self.find_reordering(s_subtree, t_subtree)
+
+                    self.search_sub_thr(s_sub_thr, t_sub_thr)
         return True
 
+    def analyse_children(self, s_subtree, t_subtree):
+        """
+        Pre-analysis of child sub trees, before the reordering detection.
+        
+        This method returns a list of hashes of both sub trees' children.
+
+        It also checks if any of the children are below the noise threshold,
+        and returns these sorted by size in a dictionary.
+        """
+        s_sub_thr = {}
+        t_sub_thr = {}
+        s_hashes = []
+        t_hashes = []
+        for c in s_subtree.get_children():
+            s_hashes.append(c.hash_value)
+            c_size = c.sub_tree_size
+            if c_size <= self.TREE_SIZE_THRESHOLD:
+                if c_size not in s_sub_thr:
+                    s_sub_thr[c_size] = []
+                s_sub_thr[c_size].append(c)
+        
+        for c in t_subtree.get_children():
+            t_hashes.append(c.hash_value)
+            c_size = c.sub_tree_size
+            if c_size <= self.TREE_SIZE_THRESHOLD:
+                if c_size not in s_sub_thr:
+                    continue
+                if c_size not in t_sub_thr:
+                    t_sub_thr[c_size] = []
+                t_sub_thr[c_size].append(c)
+
+        return s_hashes, t_hashes, s_sub_thr, t_sub_thr
+
+    def find_reordering(self, source, target):
+        """
+        Find reorderings between the direct children of the subtrees
+        <source> and <target>.
+        """
+        reordering = []
+        s_children = source.get_children()
+        t_children = target.get_children()
+        s_hashes = [c.hash_value for c in s_children]
+        t_hashes = [c.hash_value for c in t_children]
+
+        # Damerau-Levenshtein algorithm to find transpositions between children
+        levenshtein = Levenshtein()
+        edit_ops = levenshtein.get_ops(s_hashes, t_hashes, is_damerau=True)
+
+        for op in edit_ops:
+            if op[0] != 'transpose':
+                continue
+            s_child = s_children[op[1]]
+            t_child = t_children[op[2]]
+            reordering.append((
+                s_child.get_file_location(),
+                t_child.get_file_location()
+            ))
+        self.reorderings.append(reordering)
+
+    def search_sub_thr(self, s_sub_thr, t_sub_thr):
+        """
+        This method searches for reorderings in small subtrees 
+        (below the threshold). Source and target subtrees of 
+        the same size are cross compared using recursive tree 
+        traversal.
+        """
+        for size, s_node_list in s_sub_thr.items():
+            if size not in t_sub_thr:
+                continue
+            for s_node in s_node_list:
+                for t_node in t_sub_thr[size]:
+                    self.find_recursive(s_node, t_node)
+
+    def find_recursive(self, s_node, t_node):
+        """
+        Look for a reorderings anywhere between 
+        sub trees s_node and t_node.
+        
+        Uses recursive tree traversal.
+        """
+        if s_node.sub_tree_size < 3 or s_node.exact_hash == t_node.exact_hash:
+            # Recursion base case: 
+            # Not enough children for a reordering, 
+            # or the rest of the subtree is exactly equal
+            return
+
+        s_hashes, t_hashes, s_sub_thr, t_sub_thr = self.analyse_children(s_node, t_node)
+
+        if s_hashes != t_hashes and set(s_hashes) == set(t_hashes):
+            self.find_reordering(s_node, t_node)
+
+        self.search_sub_thr(s_sub_thr, t_sub_thr)
+
     def get_results(self):
+        """Format and return the results of the comparison as a Result object."""
         if self.error:
             return Result(
                 self.source.file,
@@ -117,77 +218,3 @@ class Comparison():
             self.target.error,
             self.reorderings
         )
-
-    def find_reordering(self, source, target):
-        reordering = []
-        s_children = source.get_children()
-        t_children = target.get_children()
-        s_hashes = [c.hash_value for c in s_children]
-        t_hashes = [c.hash_value for c in t_children]
-        levenshtein = Levenshtein()
-        edit_ops = levenshtein.get_ops(s_hashes, t_hashes, is_damerau=True)
-        # Since we only search for reorderings, we only
-        # expect 'transpose' operations here
-        for op in edit_ops:
-            if op[0] != 'transpose':
-                continue
-            s_child = s_children[op[1]]
-            t_child = t_children[op[2]]
-            reordering.append((
-                s_child.get_file_location(),
-                t_child.get_file_location()
-            ))
-        self.reorderings.append(reordering)
-
-    def search_leaves(self, s_leaves, t_leaves):
-        for size, s_node_list in s_leaves.items():
-            if size not in t_leaves:
-                continue
-            for s_node in s_node_list:
-                for t_node in t_leaves[size]:
-                    self.find_recursive(s_node, t_node)
-
-    def find_recursive(self, s_node, t_node):
-        if s_node.sub_tree_size < 3:
-            return
-
-        reordering = []
-        s_children = s_node.get_children()
-        t_children = t_node.get_children()
-        s_leaves = {}
-        t_leaves = {}
-        s_hashes = []
-        t_hashes = []
-        for c in s_children:
-            s_hashes.append(c.hash_value)
-            c_size = c.sub_tree_size
-            if c_size not in s_leaves:
-                s_leaves[c_size] = []
-            s_leaves[c_size].append(c)
-        
-        for c in t_children:
-            t_hashes.append(c.hash_value)
-            c_size = c.sub_tree_size
-            if c_size not in s_leaves:
-                continue
-            if c_size not in t_leaves:
-                t_leaves[c_size] = []
-            t_leaves[c_size].append(c)
-
-        if set(s_hashes) == set(t_hashes):
-            levenshtein = Levenshtein()
-            edit_ops = levenshtein.get_ops(s_hashes, t_hashes, is_damerau=True)
-            # Since we only search for reorderings, we only
-            # expect 'transpose' operations here
-            for op in edit_ops:
-                if op[0] != 'transpose':
-                    continue
-                s_child = s_children[op[1]]
-                t_child = t_children[op[2]]
-                reordering.append((
-                    s_child.get_file_location(),
-                    t_child.get_file_location()
-                ))
-            self.reorderings.append(reordering)
-
-        self.search_leaves(s_leaves, t_leaves)

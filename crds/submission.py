@@ -1,3 +1,9 @@
+"""
+Representation object for a single submission (source code file).
+
+It builds and holds the generated hashed AST and the collection of sub trees.
+"""
+
 from antlr4 import CommonTokenStream, FileStream
 from parsers.python3.Python3Lexer import Python3Lexer
 from parsers.python3.Python3Parser import Python3Parser
@@ -8,6 +14,12 @@ from .tree_builders.c_tree_builder import CTreeBuilder
 
 
 class Submission():
+    """
+    Representation class for a single submission (source code file).
+
+    It builds and holds the generated hashed AST and the collection of sub trees.
+    """
+
     # The supported file extensions and associated ANTLR classes
     PARSERS = {
         'py': (Python3Lexer, Python3Parser, PythonTreeBuilder),
@@ -53,5 +65,5 @@ class Submission():
             self.tree = builder.hashed_tree
             self.sub_trees = builder.sorted_trees
             self.sizes = sorted(builder.sub_tree_sizes, reverse=True)
-        except UnicodeDecodeError as err:
+        except UnicodeDecodeError:
             self.error = self.LEXER_ERROR

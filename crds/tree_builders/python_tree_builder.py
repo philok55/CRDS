@@ -1,5 +1,9 @@
 """
 Hashed Tree builder for the Python parser.
+
+This is an ANTLR generated parse tree listener, adapted to 
+walk a Python parse tree, build our hashed AST and store
+all its sub trees by size.
 """
 
 from antlr4 import ParseTreeWalker

@@ -9,8 +9,8 @@ class HashedNode():
     def __init__(self, ctx, parent=None, parser=None):
         """
         To define which language to expect, pass either
-         a parent node or an ANTLR generated parser.
-         """
+        a parent node or an ANTLR generated parser.
+        """
         if parser is None:
             parser=parent.parser
         self.parser=parser
@@ -23,17 +23,20 @@ class HashedNode():
         self.sub_tree_size = 1
 
     def __str__(self, level=0):
-        """Print full subtree to terminal with hash values."""
+        """
+        Build a printable string of the full subtree 
+        below this node, including hash values.
+        """
         ret = "\t"*level+repr(f"{self.rule_name} => {self.hash_value}")+"\n"
         for child in self.children:
             ret += child.__str__(level+1)
         return ret
 
     def __repr__(self):
-        return f'<Hashed Node>{self.sub_tree_size}'
+        return f'<Hashed Node>'
 
     def add_child(self, ctx:ParserRuleContext):
-        """Add a child to this node."""
+        """Add a new child to this node."""
         child = HashedNode(ctx, parent=self)
         self.children.append(child)
         return child
@@ -46,14 +49,14 @@ class HashedNode():
         value of all children (invariant over reorderings).
 
         hash_exact is an MD5 hash of the CTX type, appended to the hash
-        values of all children and then hashed again (variant over reorderings).
+        values of all children and then re-hashed (not invariant over reorderings).
 
         This function expects the child nodes to already have a hash value
         (call in upwards pass of tree traversal).
         """
         tmp_hash = tmp_hash_exact = hashlib.md5(self.rule_name.encode()).hexdigest()
         for child in self.children:
-            # Remove Python-appended '0x' at the beginning and clip to 32 characters
+            # Remove Python-prepended '0x' and clip to 32 characters (mod 2^128)
             tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[2:][-32:]
             tmp_hash = tmp_hash.rjust(32, '0')  # Fill with leading zeros to match md5 length
             tmp_hash_exact += child.exact_hash  # string append

@@ -1,5 +1,9 @@
 """
 Hashed Tree builder for the C parser.
+
+This is an ANTLR generated parse tree listener, adapted to 
+walk a C parse tree, build our hashed AST and store
+all its sub trees by size.
 """
 
 from antlr4 import ParseTreeWalker
@@ -94,7 +98,6 @@ class CTreeBuilder(CListener):
         self.hashed_tree = HashedNode(ctx, parser=CParser)
         self.current = self.hashed_tree
 
-    # Exit a parse tree produced by CParser#compilationUnit.
     def exitCompilationUnit(self, ctx:CParser.CompilationUnitContext):
         self.hash_node()
         self.store_subtree()
