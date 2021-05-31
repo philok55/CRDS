@@ -2,11 +2,11 @@
 
 This project is the implementation used for my Bachelor Thesis at the University of Amsterdam.
 
-This is a code plagiarism tool using Abstract Syntax Trees.
+CRDS (Code Reordering Detection System) is a source-code plagiarism detection tool based on Abstract Syntax Trees.
 
-Currently, comparison is only between 2 files.
+It is able to show similar code between submissions, and detect and show code reordering within similar blocks.
 
-Python and C are supported, but other languages are easy to add using ANTLR.
+Python and C are currently supported, but other languages are easy to add using ANTLR.
 
 ## Setup
 
@@ -30,6 +30,22 @@ Uses python 3.6.
     pip-sync
     ```
 
+## Usage
+
+1. To check two files against each other, run:
+
+    ```bash
+
+    python ./main.py path/to/source/file path/to/target/file
+    ```
+    
+2. To cross-compare all submissions in a single folder, run:
+
+    ```bash
+
+    python ./main.py path/to/source/foder/
+    ```
+
 ## Add new packages/dependencies to venv
 
 1. Add package name to requirements.in
@@ -40,13 +56,4 @@ Uses python 3.6.
 
     pip-compile
     pip-sync
-    ```
-
-## Run plagiarism checker
-
-1. run:
-
-    ```bash
-
-    python ./main.py path/to/source/file path/to/target/file
     ```
