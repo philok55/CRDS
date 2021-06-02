@@ -9,7 +9,6 @@ in the same traversal of the submissions.
 
 from .submission import Submission
 from .result import Result
-from .levenshtein import Levenshtein
 
 class Comparison():
     """

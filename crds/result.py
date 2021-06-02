@@ -110,6 +110,8 @@ class Result():
         for i, reorder in enumerate(self.reorderings):
             for switch in reorder:
                 for line in range(switch[0][0][0], switch[0][1][0] + 1):
+                    if line in source_lines:
+                        continue
                     if switch[0][0][0] == switch[0][1][0]:
                         source_lines[line] = (i, switch[0][0][1], switch[0][1][1])
                     elif line == switch[0][0][0]:
@@ -120,6 +122,8 @@ class Result():
                         source_lines[line] = (i, '-', '-')
 
                 for line in range(switch[1][0][0], switch[1][1][0] + 1):
+                    if line in target_lines:
+                        continue
                     if switch[1][0][0] == switch[1][1][0]:
                         target_lines[line] = (i, switch[1][0][1], switch[1][1][1])
                     elif line == switch[1][0][0]:
