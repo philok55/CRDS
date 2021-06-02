@@ -116,37 +116,27 @@ class Comparison():
     def find_reordering(self, source, target):
         """
         Find reorderings between the direct children of the subtrees
-        <source> and <target>.
+        <source> and <target>. Here we know <source> and <target> are
+        equal, except for one or more reordering(s).
         """
         reordering = []
         s_children = source.get_children()
         t_children = target.get_children()
-        s_hashes = [c.hash_value for c in s_children]
-        t_hashes = [c.hash_value for c in t_children]
 
-        while True:
-            if s_hashes == []:
-                break
-            if s_hashes[0] == t_hashes[0]:
-                del s_hashes[0]
-                del t_hashes[0]
-                del s_children[0]
+        for s_child in s_children:
+            if s_child.hash_value == t_children[0].hash_value:
                 del t_children[0]
                 continue
             j = 0
             while True:
-                if j >= len(t_hashes):
+                if j >= len(t_children):
                     return  # Should not be possible
-                if s_hashes[0] == t_hashes[j]:
-                    s_child = s_children[0]
+                if s_child.hash_value == t_children[j].hash_value:
                     t_child = t_children[j]
                     reordering.append((
                         s_child.get_file_location(),
                         t_child.get_file_location()
                     ))
-                    del s_hashes[0]
-                    del t_hashes[j]
-                    del s_children[0]
                     del t_children[j]
                     break
                 j += 1
@@ -182,7 +172,7 @@ class Comparison():
 
         s_hashes, t_hashes, s_sub_thr, t_sub_thr = self.analyse_children(s_node, t_node)
 
-        if s_hashes != t_hashes and set(s_hashes) == set(t_hashes):
+        if s_hashes != t_hashes and sorted(s_hashes) == sorted(t_hashes):
             self.find_reordering(s_node, t_node)
 
         self.search_sub_thr(s_sub_thr, t_sub_thr)
