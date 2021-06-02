@@ -75,7 +75,7 @@ class Comparison():
 
                     s_hashes, t_hashes, s_sub_thr, t_sub_thr = self.analyse_children(s_subtree, t_subtree)
 
-                    if s_hashes != t_hashes and set(s_hashes) == set(t_hashes):
+                    if s_hashes != t_hashes and sorted(s_hashes) == sorted(t_hashes):
                         self.find_reordering(s_subtree, t_subtree)
 
                     self.search_sub_thr(s_sub_thr, t_sub_thr)
@@ -125,19 +125,33 @@ class Comparison():
         s_hashes = [c.hash_value for c in s_children]
         t_hashes = [c.hash_value for c in t_children]
 
-        # Damerau-Levenshtein algorithm to find transpositions between children
-        levenshtein = Levenshtein()
-        edit_ops = levenshtein.get_ops(s_hashes, t_hashes, is_damerau=True)
-
-        for op in edit_ops:
-            if op[0] != 'transpose':
+        while True:
+            if s_hashes == []:
+                break
+            if s_hashes[0] == t_hashes[0]:
+                del s_hashes[0]
+                del t_hashes[0]
+                del s_children[0]
+                del t_children[0]
                 continue
-            s_child = s_children[op[1]]
-            t_child = t_children[op[2]]
-            reordering.append((
-                s_child.get_file_location(),
-                t_child.get_file_location()
-            ))
+            j = 0
+            while True:
+                if j >= len(t_hashes):
+                    return  # Should not be possible
+                if s_hashes[0] == t_hashes[j]:
+                    s_child = s_children[0]
+                    t_child = t_children[j]
+                    reordering.append((
+                        s_child.get_file_location(),
+                        t_child.get_file_location()
+                    ))
+                    del s_hashes[0]
+                    del t_hashes[j]
+                    del s_children[0]
+                    del t_children[j]
+                    break
+                j += 1
+
         self.reorderings.append(reordering)
 
     def search_sub_thr(self, s_sub_thr, t_sub_thr):
