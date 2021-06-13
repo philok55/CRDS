@@ -15,7 +15,7 @@ class CRDS():
     It reads the files and executes the comparison.
     """
 
-    MAX_RAM_USAGE_MB = 500
+    MAX_RAM_USAGE_MB = 900
 
     def __init__(self, files, extension):
         """Expects a list of file names and a valid file extension."""
@@ -24,17 +24,22 @@ class CRDS():
         self.submissions = []
         self.results = []
 
+    def generate(self):
+        self.build_submissions()
+        self.generate_reorderings()
+
     def run(self):
         """Main entry for similarity check."""
         self.build_submissions()
         self.run_comparison()
-        self.print_to_file()
+        # self.print_full_results()
+        # self.print_to_file()
         self.show_results()
 
     def build_submissions(self):
         """
         Build Submission objects for every source code file.
-        
+
         Because we store every AST before the comparison, this can yield
         very high RAM usage. Set a maximum RAM usage value by changing the
         constant MAX_RAM_USAGE_MB to stop the parsing when that usage is reached.
@@ -53,10 +58,24 @@ class CRDS():
             submission.build_hash_trees()
             self.submissions.append(submission)
 
+    def generate_reorderings(self):
+        """
+        Use the reordering generators to introduce
+        reorderings in the submissions.
+        """
+        for file in self.files:
+            ramusage = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+            if ramusage > self.MAX_RAM_USAGE_MB:
+                print(f'RAM usage: {ramusage} MB, aborting')
+                print(f"Submissions parsed: {len(self.submissions)}")
+                return
+            submission = Submission(file, self.extension)
+            submission.generate()
+
     def run_comparison(self):
         """
-        Here we cross-compare all submissions. 
-        We build a Comparison object, run the CRDS 
+        Here we cross-compare all submissions.
+        We build a Comparison object, run the CRDS
         algorithm and extract the results.
         """
         done = []
@@ -74,7 +93,7 @@ class CRDS():
         """
         This is the interactive command line interface to analyse the results.
 
-        It allows the user to go through all pairs of submissions, 
+        It allows the user to go through all pairs of submissions,
         from high similarity to low, and build the UIs for every result
         on-demand (or skip through).
         """
@@ -118,3 +137,10 @@ class CRDS():
 
         for result in self.results:
             result.print_similarity_score(file="results.txt")
+
+    def print_full_results(self):
+        """Print all similarity results to stdout."""
+        self.results.sort(key=lambda x: x.similarity_score, reverse=True)
+
+        for result in self.results:
+            result.print_similarity_score()

@@ -153,7 +153,7 @@ class Result():
         with open(out_file, 'w') as f:
             f.write(outputHTML)
 
-    def print_similarity_score(self, file=None):
+    def print_similarity_score(self, file=None, simple=False):
         s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
         t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
         equal = False
@@ -166,20 +166,30 @@ class Result():
         else:
             write = print
 
-        write("\n")
-        if self.s_error > 0 or self.t_error > 0:
-            write(f"COMPARISON: {s_file_name} <--> {t_file_name}: ERROR\n")
-            write(f"{s_file_name}: {self.ERRORS[self.s_error]}    ")
-            write(f"{t_file_name}: {self.ERRORS[self.t_error]}\n")
-            write("\n")
-            return
-
-        if equal:
-            write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}% (EQUAL)\n")
+        if simple:
+            if equal:
+                write(f"{s_file_name},{t_file_name},EQUAL")
+            elif self.s_error > 0 or self.t_error > 0:
+                write(f"{s_file_name},{t_file_name},ERROR")
+            else:
+                write(f"{s_file_name},{t_file_name},{self.similarity_score}")
         else:
-            write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}%\n")
-        write(f"{s_file_name}: {self.s_sim_score}%    ")
-        write(f"{t_file_name}: {self.t_sim_score}%\n")
+            write("\n")
+            if self.s_error > 0 or self.t_error > 0:
+                write(f"COMPARISON: {s_file_name} <--> {t_file_name}: ERROR\n")
+                write(f"{s_file_name}: {self.ERRORS[self.s_error]}    ")
+                write(f"{t_file_name}: {self.ERRORS[self.t_error]}\n")
+                write("\n")
+                if file is not None:
+                    f.close()
+                return
+
+            if equal:
+                write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}% (EQUAL)\n")
+            else:
+                write(f"COMPARISON: {s_file_name} <--> {t_file_name}: {self.similarity_score}%\n")
+            write(f"{s_file_name}: {self.s_sim_score}%    ")
+            write(f"{t_file_name}: {self.t_sim_score}%\n")
 
         if file is not None:
             f.close()

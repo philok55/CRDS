@@ -83,7 +83,7 @@ class Comparison():
     def analyse_children(self, s_subtree, t_subtree):
         """
         Pre-analysis of child sub trees, before the reordering detection.
-        
+
         This method returns a list of hashes of both sub trees' children.
 
         It also checks if any of the children are below the noise threshold,
@@ -100,7 +100,7 @@ class Comparison():
                 if c_size not in s_sub_thr:
                     s_sub_thr[c_size] = []
                 s_sub_thr[c_size].append(c)
-        
+
         for c in t_subtree.get_children():
             t_hashes.append(c.hash_value)
             c_size = c.sub_tree_size
@@ -145,9 +145,9 @@ class Comparison():
 
     def search_sub_thr(self, s_sub_thr, t_sub_thr):
         """
-        This method searches for reorderings in small subtrees 
-        (below the threshold). Source and target subtrees of 
-        the same size are cross compared using recursive tree 
+        This method searches for reorderings in small subtrees
+        (below the threshold). Source and target subtrees of
+        the same size are cross compared using recursive tree
         traversal.
         """
         for size, s_node_list in s_sub_thr.items():
@@ -159,14 +159,14 @@ class Comparison():
 
     def find_recursive(self, s_node, t_node):
         """
-        Look for a reorderings anywhere between 
+        Look for a reorderings anywhere between
         sub trees s_node and t_node.
-        
+
         Uses recursive tree traversal.
         """
         if s_node.sub_tree_size < 3 or s_node.exact_hash == t_node.exact_hash:
-            # Recursion base case: 
-            # Not enough children for a reordering, 
+            # Recursion base case:
+            # Not enough children for a reordering,
             # or the rest of the subtree is exactly equal
             return
 
@@ -207,9 +207,15 @@ class Comparison():
         with open(self.target.file) as t:
             target_len = sum(1 for _ in t)
 
-        self.s_sim_score = round(len(source_sim_lines) / source_len * 100, 2)
-        self.t_sim_score = round(len(target_sim_lines) / target_len * 100, 2)
-        self.similarity_score = round((self.s_sim_score + self.t_sim_score) / 2, 2)
+        try:
+            self.s_sim_score = round(len(source_sim_lines) / source_len * 100, 2)
+            self.t_sim_score = round(len(target_sim_lines) / target_len * 100, 2)
+            self.similarity_score = round((self.s_sim_score + self.t_sim_score) / 2, 2)
+        except ZeroDivisionError:
+            self.s_sim_score = 0
+            self.t_sim_score = 0
+            self.similarity_score = 0
+
         return Result(
             self.source.file,
             self.target.file,

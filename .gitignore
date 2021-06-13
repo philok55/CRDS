@@ -1,8 +1,12 @@
 venv/
 .vscode/
 __pycache__/
-test_input/
+synthetic_data/
 .antlr/
+results/
+results_moss/
+experiments/
+
 results.txt
 tree.txt
 reo_results.html
