@@ -21,12 +21,12 @@ class PythonGenerator(Python3Listener):
     """
     MODES = {
         "SUB_STATEMENT": 0,
-        "STATEMENTS": 1,
+        "SINGLE_LINE": 1,
         "FUNCTIONS": 2,
         "CODE_BLOCKS": 3
     }
 
-    MODE = MODES["SUB_STATEMENT"]
+    MODE = MODES["SINGLE_LINE"]
 
     SMALL_REORDERED_TYPES = [
         Python3Parser.TypedargslistContext,  # Function parameters
@@ -47,7 +47,7 @@ class PythonGenerator(Python3Listener):
         self.current = None
         self.sorted_trees = {}
         self.sub_tree_sizes = []
-        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/reordered_substatement_tmp/Python3/ProgTalen/' + file_name.split('/')[-1]
+        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/manual/' + file_name.split('/')[-1]
         self.reorderings_executed = 0
 
     def start(self):
@@ -66,15 +66,27 @@ class PythonGenerator(Python3Listener):
         for i, child in enumerate(ctx.children):
             if type(child) != TerminalNodeImpl:
                 if self.MODE == self.MODES["FUNCTIONS"]:
-                    isFunction = False
+                    is_function = False
                     filtered = [c for c in child.children if type(c) != TerminalNodeImpl]
                     while len(filtered) > 0:
                         c_ctx = filtered[0]
                         if type(c_ctx) == Python3Parser.FuncdefContext:
-                            isFunction = True
+                            is_function = True
                             break
                         filtered = [c for c in c_ctx.children if type(c) != TerminalNodeImpl]
-                    if not isFunction:
+                    if not is_function:
+                        continue
+                elif self.MODE == self.MODES["SINGLE_LINE"]:
+                    is_small_stmt = False
+                    filtered = [c for c in child.children if type(c) != TerminalNodeImpl]
+                    while len(filtered) == 1:
+                        c_ctx = filtered[0]
+                        if type(c_ctx) == Python3Parser.Small_stmtContext:
+                            if not c_ctx.getText().startswith("\"\"\""):
+                                is_small_stmt = True
+                                break
+                        filtered = [c for c in c_ctx.children if type(c) != TerminalNodeImpl]
+                    if not is_small_stmt:
                         continue
                 reorder.append(child)
                 indices.append(i)
@@ -104,7 +116,9 @@ class PythonGenerator(Python3Listener):
         If the node is of a type that needs
         reordering, reorder its children.
         """
-        if self.MODE == self.MODES['SUB_STATEMENT']:
+        if self.MODE == self.MODES['SINGLE_LINE']:
+            self.shuffle_children(ctx)
+        elif self.MODE == self.MODES['SUB_STATEMENT']:
             if type(ctx) in self.SMALL_REORDERED_TYPES:
                 self.shuffle_children(ctx)
         elif type(ctx) in self.LARGE_REORDERED_TYPES:
