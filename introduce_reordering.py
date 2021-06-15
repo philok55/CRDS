@@ -5,7 +5,7 @@ import sys
 from crds.crds import CRDS
 
 
-SUPPORTED_EXTENSIONS = ['py']
+SUPPORTED_EXTENSIONS = ['py', 'c']
 
 
 def main(argv):

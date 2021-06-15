@@ -1,7 +1,6 @@
 venv/
 .vscode/
 __pycache__/
-synthetic_data/
 .antlr/
 results/
 results_moss/

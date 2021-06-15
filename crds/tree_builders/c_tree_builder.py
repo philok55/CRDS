@@ -1,7 +1,7 @@
 """
 Hashed Tree builder for the C parser.
 
-This is an ANTLR generated parse tree listener, adapted to 
+This is an ANTLR generated parse tree listener, adapted to
 walk a C parse tree, build our hashed AST and store
 all its sub trees by size.
 """
@@ -48,11 +48,11 @@ class CTreeBuilder(CListener):
 
     def store_subtree(self):
         """
-        Store the sub tree that has the current node as root. 
+        Store the sub tree that has the current node as root.
         Sub trees are stored by size in a dictionary (for fast lookup) as follows:
 
         {
-            <<size>>: [<<subtree>>, <<subtree>>], 
+            <<size>>: [<<subtree>>, <<subtree>>],
             <<size>>: [<<subtree>>, <<subtree>>, <<subtree>>]
         }
 

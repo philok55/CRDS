@@ -1,7 +1,7 @@
 """
 Hashed Tree builder for the Python parser.
 
-This is an ANTLR generated parse tree listener, adapted to 
+This is an ANTLR generated parse tree listener, adapted to
 walk a Python parse tree, build our hashed AST and store
 all its sub trees by size.
 """
@@ -48,11 +48,11 @@ class PythonTreeBuilder(Python3Listener):
 
     def store_subtree(self):
         """
-        Store the sub tree that has the current node as root. 
+        Store the sub tree that has the current node as root.
         Sub trees are stored by size in a dictionary (for fast lookup) as follows:
 
         {
-            <<size>>: [<<subtree>>, <<subtree>>], 
+            <<size>>: [<<subtree>>, <<subtree>>],
             <<size>>: [<<subtree>>, <<subtree>>, <<subtree>>]
         }
 
@@ -73,7 +73,7 @@ class PythonTreeBuilder(Python3Listener):
         # Skip 'wrapper' nodes
         if ctx.getChildCount() == 1 and not isinstance(ctx.getChild(0), TerminalNode):
             return
-    
+
         self.current = self.current.add_child(ctx)
 
     def exit_rule(self, ctx):
