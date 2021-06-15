@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 struct set { struct tree *tree; };
 struct set *set_init(int turbo)
 {

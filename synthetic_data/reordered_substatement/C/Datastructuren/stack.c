@@ -1,4 +1,4 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 2
 
 struct stack
 {
@@ -12,7 +12,7 @@ struct stack *stack_init(void)
     return s;
 }
 void stack_cleanup(struct stack *s) { free(s); }
-int stack_push(struct stack *s, void *e)
+int stack_push(void *e, struct stack *s)
 {
     if (s->cur_pos == STACK_SIZE)
         return 1;
@@ -31,6 +31,6 @@ void *stack_peek(struct stack *s)
 {
     if (stack_empty(s))
         return NULL;
-    return s->data[s->cur_pos - 1];
+    return s->data[1 - s->cur_pos];
 }
 int stack_empty(struct stack *s) { return s->cur_pos == 0; }

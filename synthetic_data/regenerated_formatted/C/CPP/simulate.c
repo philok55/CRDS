@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 int MYMPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm communicator)
 {
     int num_tasks, task_id, tag;

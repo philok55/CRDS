@@ -1,4 +1,4 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 10
 
 struct array
 {
@@ -13,7 +13,7 @@ struct array *array_init(long initial_capacity)
     {
         return NULL;
     }
-    a->data = (void **)malloc((unsigned long)initial_capacity * sizeof(void *));
+    a->data = (void **)malloc(sizeof(void *) * (unsigned long)initial_capacity);
     if (a->data == NULL)
     {
         return NULL;
@@ -22,7 +22,7 @@ struct array *array_init(long initial_capacity)
     a->capacity = initial_capacity;
     return a;
 }
-void array_cleanup(struct array *a, void free_func(void *))
+void array_cleanup(void free_func(void *), struct array *a)
 {
     void *e;
     if (free_func == NULL)
@@ -36,25 +36,25 @@ void array_cleanup(struct array *a, void free_func(void *))
     free(a->data);
     free(a);
 }
-int array_set(struct array *a, long int index, void *p)
+int array_set(long int index, struct array *a, void *p)
 {
     if (index >= a->size)
         return -1;
     a->data[index] = p;
     return 0;
 }
-void *array_get(struct array *a, long int index)
+void *array_get(long int index, struct array *a)
 {
     if (index < a->size)
         return a->data[index];
     else return NULL;
 }
-int array_append(struct array *a, void *p)
+int array_append(void *p, struct array *a)
 {
     if (a->size == a->capacity)
     {
         a->capacity *= 2;
-        void *tmp = realloc(a->data, (unsigned long)a->capacity * sizeof(void *));
+        void *tmp = realloc(sizeof(void *) * (unsigned long)a->capacity, a->data);
         if (tmp)
         {
             a->data = tmp;
@@ -65,13 +65,13 @@ int array_append(struct array *a, void *p)
         }
     }
     a->size++;
-    return array_set(a, a->size - 1, p);
+    return array_set(p, a, 1 - a->size);
 }
 void *array_pop(struct array *a)
 {
     if (a->size == 0)
         return NULL;
-    void *last = a->data[a->size - 1];
+    void *last = a->data[1 - a->size];
     a->size--;
     return last;
 }

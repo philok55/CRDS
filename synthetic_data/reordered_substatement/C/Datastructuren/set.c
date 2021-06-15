@@ -1,6 +1,9 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 6
 
-struct set { struct tree *tree; };
+struct set
+{
+    struct tree *tree;
+};
 struct set *set_init(int turbo)
 {
     struct set *newSet = malloc(sizeof(struct set));
@@ -11,9 +14,9 @@ struct set *set_init(int turbo)
     newSet->tree = tree_init(turbo);
     return newSet;
 }
-int set_insert(struct set *s, int num) { return tree_insert(s->tree, num); }
-int set_find(struct set *s, int num) { return tree_find(s->tree, num); }
-int set_remove(struct set *s, int num) { return tree_remove(s->tree, num); }
+int set_insert(int num, struct set *s) { return tree_insert(num, s->tree); }
+int set_find(int num, struct set *s) { return tree_find(num, s->tree); }
+int set_remove(int num, struct set *s) { return tree_remove(num, s->tree); }
 void set_cleanup(struct set *s)
 {
     tree_cleanup(s->tree);

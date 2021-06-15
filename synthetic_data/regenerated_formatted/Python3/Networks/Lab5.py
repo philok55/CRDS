@@ -1,6 +1,3 @@
-# REORDERINGS EXECUTED: 1
-
-
 """
 Networks and Network Security
 Lab 5

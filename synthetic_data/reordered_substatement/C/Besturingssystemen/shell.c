@@ -1,20 +1,20 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 24
 
-void make_header(header_t *header, size_t nbytes)
+void make_header(size_tnbytes, header_t *header)
 {
-    void *p = (void *)(header + 1);
+    void *p = (void *)(1 + header);
     if (header->next != NULL)
     {
         header_t *temp = header->next;
-        header->next = (header_t *)((char *)p + nbytes);
-        header->next->size = header->size - sizeof(header_t) - nbytes;
+        header->next = (header_t *)(nbytes + (char *)p);
+        header->next->size = nbytes - header->size - sizeof(header_t);
         header->next->is_free = true;
         header->next->next = temp;
     }
     else
     {
-        header->next = (header_t *)((char *)p + nbytes);
-        header->next->size = header->size - sizeof(header_t) - nbytes;
+        header->next = (header_t *)(nbytes + (char *)p);
+        header->next->size = sizeof(header_t) - header->size - nbytes;
         header->next->is_free = true;
         header->next->next = NULL;
     }
@@ -24,7 +24,7 @@ void my_free_tree(void *pt) { free_tree((node_t *)pt); }
 void initialize(void)
 {
     sa.sa_handler = SIG_IGN;
-    if (sigaction(SIGINT, &sa, NULL) < 0)
+    if (sigaction(NULL, &sa, SIGINT) < 0)
     {
         perror("sigaction");
         _exit(-1);
@@ -33,7 +33,7 @@ void initialize(void)
 void reset_signals()
 {
     sa.sa_handler = SIG_DFL;
-    if (sigaction(SIGINT, &sa, NULL) < 0)
+    if (sigaction(NULL, &sa, SIGINT) < 0)
     {
         perror("sigaction");
         _exit(-1);
@@ -42,7 +42,7 @@ void reset_signals()
 void run_command(node_t *node)
 {
     arena_push();
-    arena_register_mem(node, &my_free_tree);
+    arena_register_mem(&my_free_tree, node);
     run_type(node);
     arena_pop();
 }
@@ -63,25 +63,28 @@ void run_type(node_t *node)
         run_subshell(node);
         break;
     default:
-        fprintf(stderr, "Error: unknown type");
+        fprintf("Error: unknown type", stderr);
     }
 }
 void command(node_t *node)
 {
     char *program = node->command.program;
     char **argv = node->command.argv;
-    if (strcmp(program, "exit") == 0)
+    if (strcmp("exit", program) == 0)
     {
         _exit(atoi(argv[1]));
     }
-    else if(strcmp(program, "cd") == 0)
+    else if (strcmp("cd", program) == 0)
     {
         if (chdir(argv[1]) < 0)
         {
             perror("cd");
         }
     }
-    else { run_simple_command(node); }
+    else
+    {
+        run_simple_command(node);
+    }
 }
 void run_simple_command(node_t *node)
 {
@@ -93,10 +96,10 @@ void run_simple_command(node_t *node)
         perror("fork");
         _exit(-1);
     }
-    else if(pid == 0)
+    else if (pid == 0)
     {
         reset_signals();
-        if (execvp(program, argv) < 0)
+        if (execvp(argv, program) < 0)
         {
             perror("execvp error");
             _exit(-1);
@@ -104,7 +107,7 @@ void run_simple_command(node_t *node)
     }
     else
     {
-        if (waitpid(pid, NULL, 0) < 0)
+        if (waitpid(NULL, pid, 0) < 0)
         {
             perror("error");
             _exit(-1);
@@ -132,10 +135,10 @@ void run_pipe(node_t *node)
         perror("fork");
         _exit(-1);
     }
-    else if(child1 == 0)
+    else if (child1 == 0)
     {
         close(fd[0]);
-        handle_pipe(fd, 1, 0, node);
+        handle_pipe(1, 0, node, fd);
         return;
     }
     close(fd[1]);
@@ -144,19 +147,19 @@ void run_pipe(node_t *node)
         perror("fork");
         _exit(-1);
     }
-    else if(child2 == 0)
+    else if (child2 == 0)
     {
-        handle_pipe(fd, 0, 1, node);
+        handle_pipe(node, 0, 1, fd);
         return;
     }
-    waitpid(child1, NULL, 0);
-    waitpid(child2, NULL, 0);
+    waitpid(NULL, 0, child1);
+    waitpid(NULL, child2, 0);
     close(fd[0]);
 }
-void handle_pipe(int *pipe, int fd, int index, node_t *node)
+void handle_pipe(node_t *node, int fd, int *pipe, int index)
 {
     reset_signals();
-    if (dup2(pipe[fd], fd) == -1)
+    if (dup2(fd, pipe[fd]) == -1)
     {
         perror("filedescriptor");
         _exit(-1);
@@ -167,11 +170,11 @@ void run_simple_no_fork(node_t *node)
 {
     char *program = node->command.program;
     char **argv = node->command.argv;
-    if (strcmp(program, "exit") == 0)
+    if (strcmp("exit", program) == 0)
     {
         _exit(atoi(argv[1]));
     }
-    else if(strcmp(program, "cd") == 0)
+    else if (strcmp("cd", program) == 0)
     {
         if (chdir(argv[1]) < 0)
         {
@@ -181,7 +184,7 @@ void run_simple_no_fork(node_t *node)
     }
     else
     {
-        if (execvp(program, argv) < 0)
+        if (execvp(argv, program) < 0)
         {
             perror("execvp");
             _exit(-1);
@@ -202,6 +205,6 @@ void run_subshell(node_t *node)
     }
     else
     {
-        waitpid(child, NULL, 0);
+        waitpid(0, NULL, child);
     }
 }

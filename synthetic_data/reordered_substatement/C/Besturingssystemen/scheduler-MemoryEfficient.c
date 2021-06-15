@@ -1,4 +1,4 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 7
 
 static long memory[MEM_SIZE];
 static int NTRY;
@@ -13,8 +13,8 @@ static void cpu_scheduler()
         {
             if (proc->mem_need > largest)
             {
-                queue_remove(&ready_proc, proc);
-                queue_prepend(&ready_proc, proc);
+                queue_remove(proc, &ready_proc);
+                queue_prepend(proc, &ready_proc);
                 largest = proc->mem_need;
             }
         }
@@ -31,8 +31,8 @@ static void give_memory()
         if (index >= 0)
         {
             proc->mem_base = index;
-            queue_remove(&new_proc, proc);
-            queue_append(&ready_proc, proc);
+            queue_remove(proc, &new_proc);
+            queue_append(proc, &ready_proc);
         }
         else
         {
@@ -46,8 +46,8 @@ static void give_memory()
                 if (index >= 0)
                 {
                     proc->mem_base = index;
-                    queue_remove(&new_proc, proc);
-                    queue_append(&ready_proc, proc);
+                    queue_remove(proc, &new_proc);
+                    queue_append(proc, &ready_proc);
                 }
             }
         }
@@ -98,7 +98,7 @@ void schedule(event_type event)
         cpu_scheduler();
         break;
     default:
-        printf("I cannot handle event nr. %d\n", event);
+        printf(event, "I cannot handle event nr. %d\n");
         break;
     }
 }

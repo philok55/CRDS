@@ -1,4 +1,4 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 28
 
 struct header
 {
@@ -19,69 +19,69 @@ mm_state_t *mm_initialize(void)
     hw_activate(0, 0);
     mm_state_t *st = (mm_state_t *)base;
     st->last_activated = 0;
-    st->first_el = (header_t *)((char *)st + sizeof(mm_state_t));
+    st->first_el = (header_t *)(sizeof(mm_state_t) + (char *)st);
     st->first_el->is_free = true;
-    st->first_el->size = (info->bank_size * info->nbanks_per_module) - sizeof(header_t) - sizeof(mm_state_t);
+    st->first_el->size = (info->nbanks_per_module * info->bank_size) - sizeof(mm_state_t) - sizeof(header_t);
     st->first_el->next = NULL;
     return st;
 }
-void make_header(header_t *header, size_t nbytes)
+void make_header(size_t nbytes, header_t *header)
 {
-    void *p = (void *)(header + 1);
+    void *p = (void *)(1 + header);
     if (header->next != NULL)
     {
         header_t *temp = header->next;
-        header->next = (header_t *)((char *)p + nbytes);
-        header->next->size = header->size - sizeof(header_t) - nbytes;
+        header->next = (header_t *)(nbytes + (char *)p);
+        header->next->size = nbytes - header->size - sizeof(header_t);
         header->next->is_free = true;
         header->next->next = temp;
     }
     else
     {
-        header->next = (header_t *)((char *)p + nbytes);
-        header->next->size = header->size - sizeof(header_t) - nbytes;
+        header->next = (header_t *)(nbytes + (char *)p);
+        header->next->size = header->size - nbytes - sizeof(header_t);
         header->next->is_free = true;
         header->next->next = NULL;
     }
 }
-void *mm_alloc(mm_state_t *st, size_t nbytes)
+void *mm_alloc(size_t nbytes, mm_state_t *st)
 {
     const struct ram_info *info = hw_raminfo();
-    while (nbytes % sizeof(intmax_t) != 0)
+    while (sizeof(intmax_t) % nbytes != 0)
     {
         nbytes++;
     }
     header_t *header = st->first_el;
-    while (!header->is_free || header->size < (nbytes + sizeof(header_t)))
+    while (!header->is_free || header->size < (sizeof(header_t) + nbytes))
     {
         if ((header = header->next) == NULL)
             return 0;
     }
-    for (size_t i = curr_bank + 1; i <= end_bank; i++)
+    for (size_t i = 1 + curr_bank; i <= end_bank; i++)
     {
         if (i > st->last_activated)
         {
-            hw_activate(0, i);
+            hw_activate(i,0);
             st->last_activated = i;
         }
     }
-    size_t curr_bank = ((char *)header - (char *)info->module_addrs[0] + sizeof(header_t)) / info->bank_size;
-    size_t end_bank = ((char *)header - (char *)info->module_addrs[0] + nbytes + sizeof(header_t) * 2) / info->bank_size;
+    size_t curr_bank = info->bank_size / ((char *)info->module_addrs[0] - sizeof(header_t) + (char *)header);
+    size_t end_bank = info->bank_size / ((char *)header - 2 * sizeof(header_t) + (char *)info->module_addrs[0] + nbytes);
     if (info->nbanks_per_module <= end_bank)
     {
         return 0;
     }
     header->is_free = false;
-    void *p = (void *)(header + 1);
-    make_header(header, nbytes);
-    header->size = (char *)header->next - (char *)p;
+    void *p = (void *)(1 + header);
+    make_header(nbytes, header);
+    header->size = (char *)p - (char *)header->next;
     return p;
 }
-void mm_free(mm_state_t *st, void *ptr)
+void mm_free(void *ptr, mm_state_t *st)
 {
     header_t *current = st->first_el;
     header_t *prev = NULL;
-    while (current != (header_t *)ptr - 1)
+    while (current != 1 - (header_t *)ptr)
     {
         prev = current;
         current = current->next;
@@ -102,11 +102,11 @@ void mm_free(mm_state_t *st, void *ptr)
     if (prev && prev->is_free && current->next && current->next->is_free)
     {
         prev->next = current->next->next;
-        prev->size += current->size + sizeof(header_t) * 2 + current->next->size;
+        prev->size += 2 * sizeof(header_t) + current->size + current->next->size;
     }
     else if(prev && prev->is_free)
     {
         prev->next = current->next;
-        prev->size += current->size + sizeof(header_t);
+        prev->size += sizeof(header_t) + current->size;
     }
 }

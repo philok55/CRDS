@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 typedef struct arg_st
 {
     int *buffer;

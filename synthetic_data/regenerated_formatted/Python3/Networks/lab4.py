@@ -1,5 +1,3 @@
-# REORDERINGS EXECUTED: 0
-
 """
 Lab 4
 NAME: Philo Decroos & Thijs van de Vijver

@@ -1,4 +1,4 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 6
 
 struct node
 {
@@ -38,7 +38,7 @@ int list_cleanup(struct list *l)
     free(l);
     return 0;
 }
-struct node *list_new_node(intnum)
+struct node *list_new_node(int num)
 {
     struct node *newNode = malloc(sizeof(struct node));
     if (newNode == 0)
@@ -50,7 +50,7 @@ struct node *list_new_node(intnum)
     newNode->prev = NULL;
     return newNode;
 }
-int list_add(struct list *l, int num)
+int list_add(int num, struct list *l)
 {
     struct node *newNode = list_new_node(num);
     if (l->length != 0)
@@ -74,7 +74,7 @@ int list_add(struct list *l, int num)
     l->length++;
     return 0;
 }
-int list_add_back(struct list *l, int num)
+int list_add_back(int num, struct list *l)
 {
     struct node *newNode = list_new_node(num);
     struct node *current = l->firstNode;
@@ -120,7 +120,7 @@ struct node *list_next(struct node *n)
     }
     return NULL;
 }
-struct node *list_prev(struct list *l, struct node *n)
+struct node *list_prev(struct node *n, struct list *l)
 {
     if (n != l->firstNode)
     {
@@ -128,7 +128,7 @@ struct node *list_prev(struct list *l, struct node *n)
     }
     return NULL;
 }
-int list_unlink_node(struct list *l, struct node *n)
+intlist_unlink_node(struct node *n, struct list *l)
 {
     struct node *current = l->firstNode;
     if (l->firstNode == n && l->firstNode->next == 0)
@@ -170,7 +170,7 @@ int list_unlink_node(struct list *l, struct node *n)
     return 0;
 }
 void list_free_node(struct node *n) { free(n); }
-int list_insert_after(struct list *l, struct node *n, struct node *m)
+int list_insert_after(struct node *n, struct node *m, struct list *l)
 {
     struct node *current = l->firstNode;
     while (current->next != 0)
@@ -197,7 +197,7 @@ int list_insert_after(struct list *l, struct node *n, struct node *m)
     l->length++;
     return 0;
 }
-int list_insert_before(struct list *l, struct node *n, struct node *m)
+int list_insert_before(struct node *m, struct list *l, struct node *n)
 {
     struct node *current = l->firstNode;
     while (current->next != 0)

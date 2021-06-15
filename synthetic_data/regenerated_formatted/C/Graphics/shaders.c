@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 vec3 shade_constant(intersection_point ip) { return v3_create(1, 0, 0); }
 vec3 shade_matte(intersection_point ip)
 {

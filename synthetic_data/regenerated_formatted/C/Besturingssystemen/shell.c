@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 void make_header(header_t *header, size_t nbytes)
 {
     void *p = (void *)(header + 1);

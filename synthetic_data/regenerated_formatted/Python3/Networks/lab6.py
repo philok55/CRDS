@@ -1,6 +1,3 @@
-# REORDERINGS EXECUTED: 2
-
-
 """
 Networks and Network Security
 Lab 6 - Distributed Sensor Network

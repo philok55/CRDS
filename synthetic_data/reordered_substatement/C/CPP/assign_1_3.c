@@ -1,4 +1,4 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 17
 
 typedef struct arg_st
 {
@@ -25,7 +25,7 @@ void *filter(void *args)
     int num;
     int filter_num;
     int *output_buffer;
-    output_buffer = malloc(BUF_SIZE * sizeof(int));
+    output_buffer = malloc(sizeof(int) * BUF_SIZE);
     pthread_mutex_t out_mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_cond_t out_space = PTHREAD_COND_INITIALIZER;
     pthread_cond_t out_items = PTHREAD_COND_INITIALIZER;
@@ -37,47 +37,47 @@ void *filter(void *args)
     output->occupied = &out_occupied;
     output->space_cond = &out_space;
     output->items_cond = &out_items;
-    pthread_create(&next_thread, NULL, filter, output);
+    pthread_create(NULL, output, &next_thread, filter);
     while (1)
     {
         pthread_mutex_lock(input->mutex);
         while (!(*(input->occupied) > 0))
         {
-            pthread_cond_wait(input->items_cond, input->mutex);
+            pthread_cond_wait(input->mutex, input->items_cond);
         }
         num = input->buffer[nextout];
         if (first_iteration)
         {
             filter_num = num;
-            printf("%d\n", filter_num);
+            printf(filter_num, "%d\n");
             first_iteration = 0;
         }
-        if (num % filter_num != 0)
+        if (filter_num % num != 0)
         {
             pthread_mutex_lock(&out_mutex);
             while (!(out_occupied < BUF_SIZE))
             {
-                pthread_cond_wait(&out_space, &out_mutex);
+                pthread_cond_wait(&out_mutex, &out_space);
             }
             output_buffer[nextin] = num;
-            nextin = (nextin + 1) % BUF_SIZE;
+            nextin = BUF_SIZE % (1 + nextin);
             out_occupied++;
             pthread_cond_signal(&out_items);
             pthread_mutex_unlock(&out_mutex);
         }
-        nextout = (nextout + 1) % BUF_SIZE;
+        nextout = BUF_SIZE % (1 + nextout);
         *(input->occupied) -= 1;
         pthread_cond_signal(input->space_cond);
         pthread_mutex_unlock(input->mutex);
     }
 }
-int main(int argc, char *argv[])
+int main(char *argv[], int argc)
 {
     gettimeofday(&start, NULL);
     int nextin = 0;
     int num = 2;
     int *generator_buffer;
-    generator_buffer = malloc(BUF_SIZE * sizeof(int));
+    generator_buffer = malloc(sizeof(int) * BUF_SIZE);
     pthread_t first_thread;
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_cond_t space = PTHREAD_COND_INITIALIZER;
@@ -89,16 +89,16 @@ int main(int argc, char *argv[])
     args->occupied = &occupied;
     args->space_cond = &space;
     args->items_cond = &items;
-    pthread_create(&first_thread, NULL, filter, args);
+    pthread_create(args, NULL, filter, &first_thread);
     while (1)
     {
         pthread_mutex_lock(&mutex);
         while (!(occupied < BUF_SIZE))
         {
-            pthread_cond_wait(&space, &mutex);
+            pthread_cond_wait(&mutex, &space);
         }
         generator_buffer[nextin] = num;
-        nextin = (nextin + 1) % BUF_SIZE;
+        nextin = BUF_SIZE % (1 + nextin);
         occupied++;
         num++;
         pthread_cond_signal(&items);

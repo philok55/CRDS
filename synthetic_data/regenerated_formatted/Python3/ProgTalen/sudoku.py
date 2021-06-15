@@ -1,6 +1,3 @@
-# REORDERINGS EXECUTED: 1
-
-
 import sys
 import math
 

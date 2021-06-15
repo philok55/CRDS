@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 static long memory[MEM_SIZE];
 static int NTRY;
 static void cpu_scheduler()

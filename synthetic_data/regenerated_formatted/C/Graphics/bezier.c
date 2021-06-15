@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 int fact(int n) { return n >= 1 ? n *fact(n - 1) : 1; }
 long binomial(long n, long k) { return (k != 0 && n != k) ? binomial(n - 1, k) + binomial(n - 1, k - 1) : 1; }
 float bernstein(float u, int n, int i) { return binomial(n, i) * pow(u, i) * pow(1 - u, n - i); }

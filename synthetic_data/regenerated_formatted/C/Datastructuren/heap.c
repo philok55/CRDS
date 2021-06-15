@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 static struct heap *heap_init(int (*compare)(const void *, const void *))
 {
     struct heap *h = malloc(sizeof(struct heap));

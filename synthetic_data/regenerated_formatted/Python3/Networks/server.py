@@ -1,6 +1,3 @@
-# REORDERINGS EXECUTED: 1
-
-
 """
 Lab 2 - HTTP Server
 NAME: Philo Decroos

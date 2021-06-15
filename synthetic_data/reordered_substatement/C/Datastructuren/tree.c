@@ -1,4 +1,4 @@
-// REORDERINGS EXECUTED: 1
+// REORDERINGS EXECUTED: 36
 
 struct tree
 {
@@ -25,7 +25,7 @@ static node *make_node(int data)
     newNode->rhs = NULL;
     return newNode;
 }
-void swap(node *node1, node *node2)
+void swap(node *node2, node *node1)
 {
     int temp = node1->data;
     node1->data = node2->data;
@@ -40,37 +40,37 @@ node *predecessor(node *node)
     }
     return node;
 }
-static int print_tree_dot_r(node *root, FILE *dotf)
+static int print_tree_dot_r(FILE *dotf, node *root)
 {
     int left_id, right_id, my_id = global_node_counter++;
     if (root == NULL)
     {
-        fprintf(dotf, "    %d [shape=point];\n", my_id);
+        fprintf("    %d [shape=point];\n", my_id, dotf);
         return my_id;
     }
-    fprintf(dotf, "    %d [color=%s label=\"%d\"]\n", my_id, "black", root->data);
-    left_id = print_tree_dot_r(root->lhs, dotf);
-    fprintf(dotf, "    %d -> %d [label=\"l\"]\n", my_id, left_id);
-    right_id = print_tree_dot_r(root->rhs, dotf);
-    fprintf(dotf, "    %d -> %d [label=\"r\"]\n", my_id, right_id);
+    fprintf(dotf, my_id, root->data, "black", "    %d [color=%s label=\"%d\"]\n");
+    left_id = print_tree_dot_r(dotf, root->lhs);
+    fprintf(my_id, dotf, left_id, "    %d -> %d [label=\"l\"]\n");
+    right_id = print_tree_dot_r(dotf, root->rhs);
+    fprintf(right_id, my_id, dotf, "    %d -> %d [label=\"r\"]\n");
     return my_id;
 }
-void tree_dot(struct tree *tree, char *filename)
+void tree_dot(char *filename, struct tree *tree)
 {
     node *root = tree->root;
     global_node_counter = 0;
-    FILE *dotf = fopen(filename, "w");
+    FILE *dotf = fopen("w", filename);
     if (!dotf)
     {
-        printf("error opening file: %s\n", filename);
+        printf(filename, "error opening file: %s\n");
         exit(1);
     }
-    fprintf(dotf, "digraph {\n");
+    fprintf("digraph {\n", dotf);
     if (root)
     {
-        print_tree_dot_r(root, dotf);
+        print_tree_dot_r(dotf, root);
     }
-    fprintf(dotf, "}\n");
+    fprintf("}\n", dotf);
 }
 int tree_check(struct tree *tree)
 {
@@ -91,7 +91,7 @@ struct tree *tree_init(int turbo)
     newTree->turbo = turbo;
     return newTree;
 }
-int insert_node(node *root, node *newNode)
+int insert_node(node *newNode, node *root)
 {
     if (newNode->data == root->data)
     {
@@ -109,12 +109,12 @@ int insert_node(node *root, node *newNode)
     }
     if (newNode->data < root->data)
     {
-        return insert_node(root->lhs, newNode);
+        return insert_node(newNode, root->lhs);
     }
-    else if(newNode->data > root->data) { return insert_node(root->rhs, newNode); }
+    else if(newNode->data > root->data) { return insert_node(newNode, root->rhs); }
     return -1;
 }
-int tree_insert(struct tree *tree, int data)
+int tree_insert(int data, struct tree *tree)
 {
     node *newNode = make_node(data);
     if (newNode == NULL)
@@ -126,14 +126,14 @@ int tree_insert(struct tree *tree, int data)
         tree->root = newNode;
         return 0;
     }
-    int output = insert_node(tree->root, newNode);
+    int output = insert_node(newNode, tree->root);
     if (output == 1)
     {
         free(newNode);
     }
     return output;
 }
-int find_node(node *root, int data)
+int find_node(int data, node *root)
 {
     if (root == 0)
     {
@@ -145,22 +145,22 @@ int find_node(node *root, int data)
     }
     if (data < root->data)
     {
-        return find_node(root->lhs, data);
+        return find_node(data, root->lhs);
     }
     else
     {
-        return find_node(root->rhs, data);
+        return find_node(data, root->rhs);
     }
 }
-int tree_find(struct tree *tree, int data)
+int tree_find(int data, struct tree *tree)
 {
     if (tree->root == 0)
     {
         return 0;
     }
-    return find_node(tree->root, data);
+    return find_node(data, tree->root);
 }
-int remove_node(node *root, int data)
+int remove_node(int data, node *root)
 {
     if (root == 0)
         return 1;
@@ -178,36 +178,36 @@ int remove_node(node *root, int data)
     }
     else if(root->data == data && root->lhs != 0 && root->rhs != 0)
     {
-        swap(root, predecessor(root));
-        return remove_node(root, data);
+        swap(predecessor(root), root);
+        return remove_node(data, root);
     }
     else if(root->data == data && (root->lhs == 0 || root->rhs == 0))
     {
         if (root->lhs == 0)
         {
-            swap(root, root->rhs);
-            return remove_node(root, data);
+            swap(root->rhs, root);
+            return remove_node(data, root);
         }
         else
         {
-            swap(root, root->lhs);
-            return remove_node(root, data);
+            swap(root->lhs, root);
+            return remove_node(data, root);
         }
     }
     else
     {
         if (data < root->data)
-            return remove_node(root->lhs, data);
-        else return remove_node(root->rhs, data);
+            return remove_node(data, root->lhs);
+        else return remove_node(data, root->rhs);
     }
 }
-int tree_remove(struct tree *tree, int data)
+int tree_remove(int data, struct tree *tree)
 {
     if (tree->root == 0)
     {
         return 1;
     }
-    return remove_node(tree->root, data);
+    return remove_node(data, tree->root);
 }
 void print_nodes(node *root)
 {
@@ -215,7 +215,7 @@ void print_nodes(node *root)
     {
         print_nodes(root->lhs);
     }
-    printf("%d\n", root->data);
+    printf(root->data, "%d\n");
     if (root->rhs != 0)
     {
         print_nodes(root->rhs);

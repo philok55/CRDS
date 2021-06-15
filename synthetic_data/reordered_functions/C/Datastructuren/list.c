@@ -105,7 +105,7 @@ int list_add_back(struct list *l, int num)
     l->length++;
     return 0;
 }
-struct node *list_new_node(intnum)
+struct node *list_new_node(int num)
 {
     struct node *newNode = malloc(sizeof(struct node));
     if (newNode == 0)

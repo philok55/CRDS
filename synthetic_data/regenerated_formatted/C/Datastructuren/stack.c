@@ -1,5 +1,3 @@
-// REORDERINGS EXECUTED: 1
-
 struct stack
 {
     int cur_pos;

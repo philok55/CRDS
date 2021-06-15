@@ -1,5 +1,3 @@
-# REORDERINGS EXECUTED: 0
-
 """
 Lab 3 - Chat Room (Client)
 NAME: Philo Decroos
