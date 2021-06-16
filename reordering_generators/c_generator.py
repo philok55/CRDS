@@ -46,7 +46,7 @@ class CGenerator(CListener):
         self.current = None
         self.sorted_trees = {}
         self.sub_tree_sizes = []
-        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/non/' + file_name.split('/')[-1]
+        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/manual/non/' + file_name.split('/')[-1]
         self.reorderings_executed = 0
 
     def start(self):

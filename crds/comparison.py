@@ -20,7 +20,7 @@ class Comparison():
     # Minimum size for a sub tree to be compared
     TREE_SIZE_THRESHOLD = 10
 
-    USE_PARAM_NAMES = False
+    USE_PARAM_NAMES = True
 
     def __init__(self, source, target):
         """

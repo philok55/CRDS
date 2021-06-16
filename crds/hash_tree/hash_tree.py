@@ -63,7 +63,10 @@ class HashedNode():
 
         if type(self.ctx) == CParser.DirectDeclaratorContext:
             if type(self.parent.ctx) == CParser.ParameterDeclarationContext:
-                hashable = self.rule_name + self.ctx.Identifier().getText()
+                try:
+                    hashable = self.rule_name + self.ctx.Identifier().getText()
+                except AttributeError:
+                    pass
 
         tmp_hash = tmp_hash_exact = hashlib.md5(self.rule_name.encode()).hexdigest()
         names = names_exact = hashlib.md5(hashable.encode()).hexdigest()
