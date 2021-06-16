@@ -78,7 +78,7 @@ class Sensor():
         self.known_sensors[pos] = (strength, decay)
         self.known_sensors[self.pos] = (self.strength, self.decay)
 
-    def calc_distance(self, None, pos1=pos2):
+    def calc_distance(self, pos2=None, pos1):
         """This method calculates the distance between to sensors in the grid.
         If only one position is given it uses its own coordinates as the
         second position.
@@ -87,7 +87,7 @@ class Sensor():
             return math.sqrt(abs(pos1[1]-self.pos[1])**2+abs(pos1[0]-self.pos[0])**2)
         return math.sqrt(abs(pos2[1]-pos1[1])**2+abs(pos2[0]-pos1[0])**2)
 
-    def calc_range(pos2, None, pos1=self):
+    def calc_range(self, pos2=None, pos1):
         """Calculates whether the sensor at pos1 can reach the sensor at
         pos2. If no pos2 is given we calculate whether we can reach pos1 from
         our own sensor. To calculate the range we use the strength and decay
@@ -278,7 +278,7 @@ class Sensor():
                 neighbors.append(sen)
         return neighbors
 
-    def dijkstra(self, typ, dest, None=source):
+    def dijkstra(self, typ, dest, source=None):
         """This method uses the dijkstra algorithm to find the shortest path
         from source to dest. If no source is specified we use our own position
         as source. typ specifies whether we find the shortest path based on

@@ -23,10 +23,10 @@ class CGenerator(CListener):
         "SUB_STATEMENT": 0,
         "STATEMENTS": 1,
         "FUNCTIONS": 2,
-        "CODE_BLOCKS": 3
+        "CONDITIONALS": 3
     }
 
-    MODE = MODES["SUB_STATEMENT"]
+    MODE = MODES["CONDITIONALS"]
 
     SMALL_REORDERED_TYPES = [
         CParser.ParameterListContext,  # Function parameters
@@ -46,12 +46,40 @@ class CGenerator(CListener):
         self.current = None
         self.sorted_trees = {}
         self.sub_tree_sizes = []
-        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/reordered_substatement_tmp/C/Graphics/' + file_name.split('/')[-1]
+        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/non/' + file_name.split('/')[-1]
         self.reorderings_executed = 0
 
     def start(self):
         walker = ParseTreeWalker()
         walker.walk(self, self.tree)
+
+    def is_function(self, ctx):
+        is_function = False
+        filtered = [c for c in ctx.children if type(c) != TerminalNodeImpl]
+        while len(filtered) > 0:
+            c_ctx = filtered[0]
+            if type(c_ctx) == CParser.FunctionDefinitionContext:
+                is_function = True
+                break
+            filtered = [c for c in c_ctx.children if type(c) != TerminalNodeImpl]
+        return is_function
+
+    def is_stmt_in_blockitem(self, ctx):
+        if type(ctx) != CParser.BlockItemContext:
+            return False
+        filtered = [c for c in ctx.children if type(c) != TerminalNodeImpl]
+        statement = filtered[0]
+        return type(statement) == CParser.StatementContext
+
+    def is_case_stmt(self, ctx):
+        if type(ctx) != CParser.BlockItemContext:
+            return False
+        filtered = [c for c in ctx.children if type(c) != TerminalNodeImpl]
+        statement = filtered[0]
+        if type(statement) != CParser.StatementContext:
+            return False
+        filtered = [c for c in statement.children if type(c) != TerminalNodeImpl]
+        return type(filtered[0]) == CParser.LabeledStatementContext
 
     def shuffle_children(self, ctx):
         """
@@ -62,38 +90,74 @@ class CGenerator(CListener):
         """
         reorder = []
         indices = []
+        cases = {}
+        curr_case = None
+        is_switch_case = False
         for i, child in enumerate(ctx.children):
             if type(child) != TerminalNodeImpl:
-                if self.MODE == self.MODES["FUNCTIONS"]:
-                    isFunction = False
-                    filtered = [c for c in child.children if type(c) != TerminalNodeImpl]
-                    while len(filtered) > 0:
-                        c_ctx = filtered[0]
-                        if type(c_ctx) == CParser.FunctionDefinitionContext:
-                            isFunction = True
-                            break
-                        filtered = [c for c in c_ctx.children if type(c) != TerminalNodeImpl]
-                    if not isFunction:
+                if self.MODE == self.MODES["FUNCTIONS"] and not self.is_function(child):
+                    continue
+                elif self.MODE == self.MODES["CONDITIONALS"]:
+                    if type(ctx) == CParser.BlockItemListContext:
+                        if not self.is_stmt_in_blockitem(child):
+                            continue
+                        if self.is_case_stmt(child):
+                            is_switch_case = True
+                            cases[i] = []
+                            curr_case = i
+                            indices.append(i)
+                        elif is_switch_case:
+                            cases[curr_case].append(i)
                         continue
                 reorder.append(child)
                 indices.append(i)
 
-        old_order = list(reorder)
-        reordered = False
-        if len(reorder) < 2:
-            return
-        while True:
-            for i, c in enumerate(reorder):
-                if id(c) != id(old_order[i]):
-                    reordered = True
+        if is_switch_case:
+            old_indices = list(indices)
+            if len(indices) < 2:
+                return
+            while True:
+                if indices != old_indices:
                     break
-            if reordered:
-                break
-            random.shuffle(reorder)
+                random.shuffle(indices)
+            new_children = []
+            for i in indices:
+                new_children.append(ctx.children[i])
+                stmts = [ctx.children[j] for j in cases[i]]
+                new_children.extend(stmts)
+            ctx.children = list(new_children)
+            self.reorderings_executed += 1
+        else:
+            old_order = list(reorder)
+            reordered = False
+            if len(reorder) < 2:
+                return
+            while True:
+                for i, c in enumerate(reorder):
+                    if id(c) != id(old_order[i]):
+                        reordered = True
+                        break
+                if reordered:
+                    break
+                random.shuffle(reorder)
+            self.reorderings_executed += 1
+            for j, child in enumerate(reorder):
+                index = indices[j]
+                ctx.children[index] = child
+
+    def switch_if_else(self, ctx):
+        if type(ctx) != CParser.SelectionStatementContext:
+            return
+        children = [child for child in ctx.children if type(child) != TerminalNodeImpl]
+        if len(children) != 3:
+            return
+        if type(children[0]) != CParser.ExpressionContext:
+            print("IF WITHOUT CONDITIONAL??")
+            return
+        tmp = list(ctx.children)
+        ctx.children[4] = tmp[6]
+        ctx.children[6] = tmp[4]
         self.reorderings_executed += 1
-        for j, child in enumerate(reorder):
-            index = indices[j]
-            ctx.children[index] = child
 
     def enter_rule(self, ctx):
         pass
@@ -103,7 +167,12 @@ class CGenerator(CListener):
         If the node is of a type that needs
         reordering, reorder its children.
         """
-        if self.MODE == self.MODES['SUB_STATEMENT']:
+        if self.MODE == self.MODES["CONDITIONALS"]:
+            if type(ctx) == CParser.BlockItemListContext:
+                self.shuffle_children(ctx)
+            if type(ctx) == CParser.SelectionStatementContext:
+                self.switch_if_else(ctx)
+        elif self.MODE == self.MODES['SUB_STATEMENT']:
             if type(ctx) in self.SMALL_REORDERED_TYPES:
                 self.shuffle_children(ctx)
         elif type(ctx) in self.TOP_LEVEL_REORDERED_TYPES:

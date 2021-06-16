@@ -128,7 +128,7 @@ struct node *list_prev(struct node *n, struct list *l)
     }
     return NULL;
 }
-intlist_unlink_node(struct node *n, struct list *l)
+int list_unlink_node(struct node *n, struct list *l)
 {
     struct node *current = l->firstNode;
     if (l->firstNode == n && l->firstNode->next == 0)

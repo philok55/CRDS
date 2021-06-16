@@ -105,7 +105,6 @@ class Result():
         Renders a simple highlighting UI to a HTML file,
         displaying reorderings between two files.
         """
-        print(f"REORDERINGS FOUND: {len(self.reorderings)}")
         source_lines = {}
         target_lines = {}
         for i, reorder in enumerate(self.reorderings):
@@ -194,3 +193,6 @@ class Result():
 
         if file is not None:
             f.close()
+
+    def get_reorderings_found(self):
+        return len(self.reorderings)

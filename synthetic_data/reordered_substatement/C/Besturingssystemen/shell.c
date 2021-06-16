@@ -1,6 +1,6 @@
 // REORDERINGS EXECUTED: 24
 
-void make_header(size_tnbytes, header_t *header)
+void make_header(size_t nbytes, header_t *header)
 {
     void *p = (void *)(1 + header);
     if (header->next != NULL)
