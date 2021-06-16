@@ -34,8 +34,8 @@ class CRDS():
         self.build_submissions()
         self.run_comparison()
         # self.print_full_results()
-        self.print_to_file()
-        # self.show_results()
+        # self.print_to_file()
+        self.show_results()
 
     def build_submissions(self):
         """
@@ -135,14 +135,14 @@ class CRDS():
     def print_to_file(self):
         """Print all similarity results to 'results.txt'."""
         self.results.sort(key=lambda x: x.similarity_score, reverse=True)
-        filename = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/results/reordering/totals.csv'
+        filename = 'results.txt'
         submission = "/".join(self.files[0].split('/')[-3:-1])
         file = open(filename, 'a')
         file.write(f"{submission},{self.reorderings_found}\n")
         file.close()
 
-        # for result in self.results:
-        #     result.print_similarity_score(file=filename)
+        for result in self.results:
+            result.print_similarity_score(file=filename)
 
     def print_full_results(self):
         """Print all similarity results to stdout."""

@@ -1,5 +1,7 @@
 """HashedNode is a language independent node in the hashed Abstract Syntax Tree."""
 
+from parsers.python3.Python3Parser import Python3Parser
+from parsers.C.CParser import CParser
 import hashlib
 from antlr4 import ParserRuleContext
 
@@ -19,12 +21,13 @@ class HashedNode():
         self.ctx = ctx
         self.hash_value = None
         self.exact_hash = None
+        self.names_hash_exact = None
         self.rule_name = parser.ruleNames[ctx.getRuleIndex()]
         self.sub_tree_size = 1
 
     def __str__(self, level=0):
         """
-        Build a printable string of the full subtree 
+        Build a printable string of the full subtree
         below this node, including hash values.
         """
         ret = "\t"*level+repr(f"{self.rule_name} => {self.hash_value}")+"\n"
@@ -54,14 +57,29 @@ class HashedNode():
         This function expects the child nodes to already have a hash value
         (call in upwards pass of tree traversal).
         """
+        hashable = self.rule_name
+        if type(self.ctx) == Python3Parser.TfpdefContext:
+            hashable = self.rule_name + self.ctx.NAME().getText()
+
+        if type(self.ctx) == CParser.DirectDeclaratorContext:
+            if type(self.parent.ctx) == CParser.ParameterDeclarationContext:
+                hashable = self.rule_name + self.ctx.Identifier().getText()
+
         tmp_hash = tmp_hash_exact = hashlib.md5(self.rule_name.encode()).hexdigest()
+        names = names_exact = hashlib.md5(hashable.encode()).hexdigest()
+
         for child in self.children:
             # Remove Python-prepended '0x' and clip to 32 characters (mod 2^128)
             tmp_hash = hex(int(tmp_hash, 16) + int(child.hash_value, 16))[2:][-32:]
             tmp_hash = tmp_hash.rjust(32, '0')  # Fill with leading zeros to match md5 length
+            names = hex(int(names, 16) + int(child.names_hash, 16))[2:][-32:]
+            names = names.rjust(32, '0')  # Fill with leading zeros to match md5 length
             tmp_hash_exact += child.exact_hash  # string append
+            names_exact += child.names_hash_exact  # string append
         self.hash_value = tmp_hash
+        self.names_hash = names
         self.exact_hash = hashlib.md5(tmp_hash_exact.encode()).hexdigest()
+        self.names_hash_exact = hashlib.md5(names_exact.encode()).hexdigest()
 
     def set_subtree_size(self):
         """

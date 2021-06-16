@@ -20,6 +20,8 @@ class Comparison():
     # Minimum size for a sub tree to be compared
     TREE_SIZE_THRESHOLD = 10
 
+    USE_PARAM_NAMES = False
+
     def __init__(self, source, target):
         """
         Call __init__ with source:Submission and target:Submission
@@ -69,12 +71,16 @@ class Comparison():
                         t_subtree.get_file_location()
                     ))
 
-                    if similarity_only or s_subtree.exact_hash == t_subtree.exact_hash:
+                    exact_hashes_equal = s_subtree.exact_hash == t_subtree.exact_hash
+                    if self.USE_PARAM_NAMES:
+                        exact_hashes_equal = s_subtree.names_hash_exact == t_subtree.names_hash_exact
+
+                    if similarity_only or exact_hashes_equal:
                         continue  # No need to look for reorderings
 
                     s_hashes, t_hashes, s_sub_thr, t_sub_thr = self.analyse_children(s_subtree, t_subtree)
 
-                    if s_hashes != t_hashes and sorted(s_hashes) == sorted(t_hashes):
+                    if sorted(s_hashes) == sorted(t_hashes):
                         self.find_reordering(s_subtree, t_subtree)
 
                     self.search_sub_thr(s_sub_thr, t_sub_thr)
@@ -94,7 +100,10 @@ class Comparison():
         s_hashes = []
         t_hashes = []
         for c in s_subtree.get_children():
-            s_hashes.append(c.hash_value)
+            if self.USE_PARAM_NAMES:
+                s_hashes.append(c.names_hash)
+            else:
+                s_hashes.append(c.hash_value)
             c_size = c.sub_tree_size
             if c_size <= self.TREE_SIZE_THRESHOLD:
                 if c_size not in s_sub_thr:
@@ -102,7 +111,10 @@ class Comparison():
                 s_sub_thr[c_size].append(c)
 
         for c in t_subtree.get_children():
-            t_hashes.append(c.hash_value)
+            if self.USE_PARAM_NAMES:
+                t_hashes.append(c.names_hash)
+            else:
+                t_hashes.append(c.hash_value)
             c_size = c.sub_tree_size
             if c_size <= self.TREE_SIZE_THRESHOLD:
                 if c_size not in s_sub_thr:
@@ -123,25 +135,35 @@ class Comparison():
         s_children = source.get_children()
         t_children = target.get_children()
 
-        for s_child in s_children:
-            if s_child.hash_value == t_children[0].hash_value:
+        if self.USE_PARAM_NAMES:
+            s_hashes = [c.names_hash for c in s_children]
+            t_hashes = [c.names_hash for c in t_children]
+        else:
+            s_hashes = [c.hash_value for c in s_children]
+            t_hashes = [c.hash_value for c in t_children]
+
+        for i, s_child in enumerate(s_children):
+            if s_hashes[i] == t_hashes[0]:
                 del t_children[0]
+                del t_hashes[0]
                 continue
             j = 0
             while True:
                 if j >= len(t_children):
                     return  # Should not be possible
-                if s_child.hash_value == t_children[j].hash_value:
+                if s_hashes[i] == t_hashes[j]:
                     t_child = t_children[j]
                     reordering.append((
                         s_child.get_file_location(),
                         t_child.get_file_location()
                     ))
                     del t_children[j]
+                    del t_hashes[j]
                     break
                 j += 1
 
-        self.reorderings.append(reordering)
+        if reordering != []:
+            self.reorderings.append(reordering)
 
     def search_sub_thr(self, s_sub_thr, t_sub_thr):
         """
@@ -164,7 +186,11 @@ class Comparison():
 
         Uses recursive tree traversal.
         """
-        if s_node.sub_tree_size < 3 or s_node.exact_hash == t_node.exact_hash:
+        exact_hashes_equal = s_node.exact_hash == t_node.exact_hash
+        if self.USE_PARAM_NAMES:
+            exact_hashes_equal = s_node.names_hash_exact == t_node.names_hash_exact
+
+        if s_node.sub_tree_size < 3 or exact_hashes_equal:
             # Recursion base case:
             # Not enough children for a reordering,
             # or the rest of the subtree is exactly equal
@@ -172,7 +198,7 @@ class Comparison():
 
         s_hashes, t_hashes, s_sub_thr, t_sub_thr = self.analyse_children(s_node, t_node)
 
-        if s_hashes != t_hashes and sorted(s_hashes) == sorted(t_hashes):
+        if sorted(s_hashes) == sorted(t_hashes):
             self.find_reordering(s_node, t_node)
 
         self.search_sub_thr(s_sub_thr, t_sub_thr)

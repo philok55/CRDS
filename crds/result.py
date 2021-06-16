@@ -191,6 +191,8 @@ class Result():
             write(f"{s_file_name}: {self.s_sim_score}%    ")
             write(f"{t_file_name}: {self.t_sim_score}%\n")
 
+            write(f"REORDERINGS FOUND: {self.get_reorderings_found()}")
+
         if file is not None:
             f.close()
 

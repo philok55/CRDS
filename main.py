@@ -28,9 +28,9 @@ def main(argv):
             else:
                 print(f"File {file} skipped: file type not supported.")
     except NotADirectoryError:
-        if len(argv) < 3:
-            print("Please select more than one file.")
-            return
+        # if len(argv) < 3:
+        #     print("Please select more than one file.")
+        #     return
         for file in argv[1:]:
             ext = file.split('.')[-1]
             if ext in SUPPORTED_EXTENSIONS and selected_ext in ['', ext]:
@@ -41,6 +41,8 @@ def main(argv):
                 return
             else:
                 print(f"File {file} skipped: file type not supported.")
+
+    # files.append(files[0])
 
     checker = CRDS(files, selected_ext)
     checker.run()
