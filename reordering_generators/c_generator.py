@@ -26,13 +26,19 @@ class CGenerator(CListener):
         "CONDITIONALS": 3
     }
 
-    MODE = MODES["CONDITIONALS"]
+    MODE = MODES["STATEMENTS"]
 
     SMALL_REORDERED_TYPES = [
         CParser.ParameterListContext,  # Function parameters
         CParser.ArgumentExpressionListContext,  # Arguments in function call
         CParser.MultiplicativeExpressionContext,  # +, -
         CParser.AdditiveExpressionContext,  # *, /, %
+    ]
+
+    SMALL_STATEMENTS = [
+        CParser.ExpressionStatementContext,
+        CParser.DeclarationContext,
+        CParser.JumpStatementContext
     ]
 
     TOP_LEVEL_REORDERED_TYPES = [
@@ -46,7 +52,7 @@ class CGenerator(CListener):
         self.current = None
         self.sorted_trees = {}
         self.sub_tree_sizes = []
-        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/manual/non/' + file_name.split('/')[-1]
+        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/reordered_statements/C/Graphics/' + file_name.split('/')[-1]
         self.reorderings_executed = 0
 
     def start(self):
@@ -63,6 +69,17 @@ class CGenerator(CListener):
                 break
             filtered = [c for c in c_ctx.children if type(c) != TerminalNodeImpl]
         return is_function
+
+    def is_small_stmt(self, ctx):
+        is_small_stmt = False
+        filtered = [c for c in ctx.children if type(c) != TerminalNodeImpl]
+        while len(filtered) == 1:
+            c_ctx = filtered[0]
+            if type(c_ctx) in self.SMALL_STATEMENTS:
+                is_small_stmt = True
+                break
+            filtered = [c for c in c_ctx.children if type(c) != TerminalNodeImpl]
+        return is_small_stmt
 
     def is_stmt_in_blockitem(self, ctx):
         if type(ctx) != CParser.BlockItemContext:
@@ -95,7 +112,8 @@ class CGenerator(CListener):
         is_switch_case = False
         for i, child in enumerate(ctx.children):
             if type(child) != TerminalNodeImpl:
-                if self.MODE == self.MODES["FUNCTIONS"] and not self.is_function(child):
+                if ((self.MODE == self.MODES["FUNCTIONS"] and not self.is_function(child)) or
+                    (self.MODE == self.MODES["STATEMENTS"] and not self.is_small_stmt(child))):
                     continue
                 elif self.MODE == self.MODES["CONDITIONALS"]:
                     if type(ctx) == CParser.BlockItemListContext:
@@ -167,10 +185,12 @@ class CGenerator(CListener):
         If the node is of a type that needs
         reordering, reorder its children.
         """
-        if self.MODE == self.MODES["CONDITIONALS"]:
+        if self.MODE == self.MODES['STATEMENTS']:
+            self.shuffle_children(ctx)
+        elif self.MODE == self.MODES["CONDITIONALS"]:
             if type(ctx) == CParser.BlockItemListContext:
                 self.shuffle_children(ctx)
-            if type(ctx) == CParser.SelectionStatementContext:
+            elif type(ctx) == CParser.SelectionStatementContext:
                 self.switch_if_else(ctx)
         elif self.MODE == self.MODES['SUB_STATEMENT']:
             if type(ctx) in self.SMALL_REORDERED_TYPES:

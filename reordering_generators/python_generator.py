@@ -26,7 +26,7 @@ class PythonGenerator(Python3Listener):
         "CONDITIONALS": 3
     }
 
-    MODE = MODES["CONDITIONALS"]
+    MODE = MODES["STATEMENTS"]
 
     SMALL_REORDERED_TYPES = [
         Python3Parser.TypedargslistContext,  # Function parameters
@@ -47,7 +47,7 @@ class PythonGenerator(Python3Listener):
         self.current = None
         self.sorted_trees = {}
         self.sub_tree_sizes = []
-        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/manual/non/' + file_name.split('/')[-1]
+        self.out_file = '/home/philo/Documents/uva/Jaar_3/thesis/CRDS/synthetic_data/reordered_statements/Python3/ProgTalen/' + file_name.split('/')[-1]
         self.reorderings_executed = 0
 
     def start(self):

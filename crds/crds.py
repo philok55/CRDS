@@ -150,3 +150,5 @@ class CRDS():
 
         for result in self.results:
             result.print_similarity_score()
+
+        print(f"REORDERINGS FOUND: {self.reorderings_found}")
