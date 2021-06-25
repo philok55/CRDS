@@ -48,9 +48,7 @@ class Comparison():
         Call with similarity_only=True to only execute the
         similarity checks.
         """
-        if self.source.tree is None:
-            self.source.build_hash_trees()
-        if self.target.tree is None:
+        if None in [self.source_tree, self.target_tree]:
             self.target.build_hash_trees()
         if (self.source.error != Submission.NO_ERROR or
             self.target.error != Submission.NO_ERROR):
@@ -64,7 +62,7 @@ class Comparison():
             for s_subtree in self.source.sub_trees[size]:
                 for t_subtree in self.target.sub_trees[size]:
                     if s_subtree.hash_value != t_subtree.hash_value:
-                        continue  # Subtrees are not equal
+                        continue  # Subtrees are not similar
 
                     self.similarities.append((
                         s_subtree.get_file_location(),
