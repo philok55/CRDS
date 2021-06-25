@@ -51,8 +51,10 @@ class HashedNode():
         hash_value is an MD5 hash of the CTX type, summed with the hash
         value of all children (invariant over reorderings).
 
-        hash_exact is an MD5 hash of the CTX type, appended to the hash
+        exact_hash is an MD5 hash of the CTX type, appended to the hash
         values of all children and then re-hashed (not invariant over reorderings).
+
+        names_hash includes parameter names of functions into the hash.
 
         This function expects the child nodes to already have a hash value
         (call in upwards pass of tree traversal).

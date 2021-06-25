@@ -154,6 +154,7 @@ class Result():
             f.write(outputHTML)
 
     def print_similarity_score(self, file=None, simple=True):
+        """Prints the similarity score of this result to a file or to stdout."""
         s_file_name = self.source_file.replace('\\', '/').split('/')[-4]
         t_file_name = self.target_file.replace('\\', '/').split('/')[-4]
         equal = False
@@ -197,6 +198,7 @@ class Result():
             f.close()
 
     def print_reorderings(self):
+        """Prints the amount of reorderings that were found in this result."""
         s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
         t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
         equal = False
