@@ -1,12 +1,12 @@
 # CRDS: Code Reordering Detection System
 
 This project is a Proof-of-Concept implementation used for my Bachelor Thesis at the University of Amsterdam.
-
 CRDS (Code Reordering Detection System) is a source-code plagiarism detection tool based on Abstract Syntax Trees.
-
 It is able to show similar code between submissions, and detect and show code reordering within similar blocks.
 
 Python and C are currently supported, but other languages are easy to add using ANTLR.
+
+The thesis is included in the repository for anyone that is very interested.
 
 ## Setup
 
