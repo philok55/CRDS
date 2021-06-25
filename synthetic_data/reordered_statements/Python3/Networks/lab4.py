@@ -53,7 +53,7 @@ def main():
                 colors[i-1]=[1,1,0,1]
                 slow_start=True
             else:
-                if notfast_recovery:
+                if not fast_recovery:
                     fast_recovery=True
                     print(">> Transition at "+str(times[i-1])+" to fast recovery. Value of cwnd: "+str(cwnd[i-1])+".")
                     avoidance=False

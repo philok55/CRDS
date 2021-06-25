@@ -42,8 +42,6 @@ def main(argv):
             else:
                 print(f"File {file} skipped: file type not supported.")
 
-    # files.append(files[0].replace("original", "reordered_conditionals"))
-
     checker = CRDS(files, selected_ext)
     checker.run()
 

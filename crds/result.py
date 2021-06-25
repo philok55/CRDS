@@ -153,9 +153,9 @@ class Result():
         with open(out_file, 'w') as f:
             f.write(outputHTML)
 
-    def print_similarity_score(self, file=None, simple=False):
-        s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
-        t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
+    def print_similarity_score(self, file=None, simple=True):
+        s_file_name = self.source_file.replace('\\', '/').split('/')[-4]
+        t_file_name = self.target_file.replace('\\', '/').split('/')[-4]
         equal = False
         if filecmp.cmp(self.source_file, self.target_file):
             equal=True
@@ -168,11 +168,11 @@ class Result():
 
         if simple:
             if equal:
-                write(f"{s_file_name},{t_file_name},EQUAL")
+                write(f"{s_file_name},{t_file_name},EQUAL\n")
             elif self.s_error > 0 or self.t_error > 0:
-                write(f"{s_file_name},{t_file_name},ERROR")
+                write(f"{s_file_name},{t_file_name},ERROR\n")
             else:
-                write(f"{s_file_name},{t_file_name},{self.similarity_score}")
+                write(f"{s_file_name},{t_file_name},{self.similarity_score}\n")
         else:
             write("\n")
             if self.s_error > 0 or self.t_error > 0:
@@ -195,6 +195,20 @@ class Result():
 
         if file is not None:
             f.close()
+
+    def print_reorderings(self):
+        s_file_name = self.source_file.replace('\\', '/').split('/')[-1]
+        t_file_name = self.target_file.replace('\\', '/').split('/')[-1]
+        equal = False
+        if filecmp.cmp(self.source_file, self.target_file):
+            equal=True
+
+        if equal:
+            print(f"{s_file_name},{t_file_name},{len(self.reorderings)},EQUAL")
+        elif self.s_error > 0 or self.t_error > 0:
+            print(f"{s_file_name},{t_file_name},ERROR")
+        else:
+            print(f"{s_file_name},{t_file_name},{len(self.reorderings)}")
 
     def get_reorderings_found(self):
         return len(self.reorderings)

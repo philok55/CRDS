@@ -136,9 +136,9 @@ class CRDS():
         """Print all similarity results to 'results.txt'."""
         self.results.sort(key=lambda x: x.similarity_score, reverse=True)
         filename = 'results.txt'
-        submission = "/".join(self.files[0].split('/')[-3:-1])
+        submission = self.files[0].split('/')[-1]
         file = open(filename, 'a')
-        file.write(f"{submission},{self.reorderings_found}\n")
+        file.write(f"\n\n{submission}\n")
         file.close()
 
         for result in self.results:

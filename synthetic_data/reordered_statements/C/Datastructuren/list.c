@@ -111,7 +111,7 @@ struct node *list_head(struct list *l)
     return l->firstNode;
 }
 int list_length(struct list *l) { return l->length; }
-intlist_node_data(struct node *n) { return n->value; }
+int list_node_data(struct node *n) { return n->value; }
 struct node *list_next(struct node *n)
 {
     if (n->next != NULL)

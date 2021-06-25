@@ -1,6 +1,6 @@
 // REORDERINGS EXECUTED: 8
 
-vec3 shade_constant(intersection_point ip) { returnv3_create(1, 0, 0); }
+vec3 shade_constant(intersection_point ip) { return v3_create(1, 0, 0); }
 vec3 shade_matte(intersection_point ip)
 {
     return v3_create(matte, matte, matte);
@@ -37,7 +37,7 @@ vec3 shade_blinn_phong(intersection_point ip)
         matte += s_matte;
         spec += s_spec;
         float dot_spec = v3_dotprod(ip.n, h);
-        vec3h = v3_normalize(v3_add(e, l));
+        vec3 h = v3_normalize(v3_add(e, l));
         float dot_matte = fmax(v3_dotprod(l, ip.n), 0);
         light sl = scene_lights[i];
     }

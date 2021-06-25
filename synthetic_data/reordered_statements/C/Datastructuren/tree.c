@@ -80,7 +80,7 @@ int tree_check(struct tree *tree)
     }
     return 0;
 }
-struct tree *tree_init(intturbo)
+struct tree *tree_init(int turbo)
 {
     struct tree *newTree = malloc(sizeof(struct tree));
     if (newTree == 0)

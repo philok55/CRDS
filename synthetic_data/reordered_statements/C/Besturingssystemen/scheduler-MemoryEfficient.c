@@ -36,7 +36,7 @@ static void give_memory()
         }
         else
         {
-            for (inti = 0; i < NTRY; i++)
+            for (int i = 0; i < NTRY; i++)
             {
                 if ((proc = proc->next) == NULL)
                 {
